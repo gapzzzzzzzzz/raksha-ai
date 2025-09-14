@@ -108,7 +108,7 @@ export const KEYBOARD_KEYS = {
 } as const
 
 export function isKeyboardNavigation(event: KeyboardEvent): boolean {
-  const navigationKeys = [
+  const navigationKeys: string[] = [
     KEYBOARD_KEYS.ENTER,
     KEYBOARD_KEYS.SPACE,
     KEYBOARD_KEYS.ESCAPE,
@@ -120,7 +120,7 @@ export function isKeyboardNavigation(event: KeyboardEvent): boolean {
     KEYBOARD_KEYS.HOME,
     KEYBOARD_KEYS.END
   ]
-  return navigationKeys.includes(event.key as any)
+  return navigationKeys.includes(event.key)
 }
 
 // Focus management
