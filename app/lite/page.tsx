@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -33,19 +33,22 @@ export default function LitePage() {
   })
 
   // Check online status
-  useState(() => {
-    setIsOffline(!navigator.onLine)
-    const handleOnline = () => setIsOffline(false)
-    const handleOffline = () => setIsOffline(true)
-    
-    window.addEventListener('online', handleOnline)
-    window.addEventListener('offline', handleOffline)
-    
-    return () => {
-      window.removeEventListener('online', handleOnline)
-      window.removeEventListener('offline', handleOffline)
+  useEffect(() => {
+    // Only run on client side
+    if (typeof window !== 'undefined') {
+      setIsOffline(!navigator.onLine)
+      const handleOnline = () => setIsOffline(false)
+      const handleOffline = () => setIsOffline(true)
+      
+      window.addEventListener('online', handleOnline)
+      window.addEventListener('offline', handleOffline)
+      
+      return () => {
+        window.removeEventListener('online', handleOnline)
+        window.removeEventListener('offline', handleOffline)
+      }
     }
-  })
+  }, [])
 
   const onSubmit = async (data: TriageForm) => {
     setLoading(true)

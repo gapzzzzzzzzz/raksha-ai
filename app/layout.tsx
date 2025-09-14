@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
@@ -19,8 +19,6 @@ export const metadata: Metadata = {
   title: "Raksha - AI Health Triage 24/7",
   description: "Triage kesehatan berbasis AI yang inklusif dan kontekstual untuk Indonesia",
   manifest: "/manifest.json",
-  themeColor: "#0EA5E9",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
   robots: {
     index: true,
     follow: true,
@@ -45,6 +43,13 @@ export const metadata: Metadata = {
     title: "Raksha - AI Health Triage 24/7",
     description: "Triage kesehatan berbasis AI yang inklusif dan kontekstual untuk Indonesia",
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: "#0EA5E9",
 };
 
 export default function RootLayout({
