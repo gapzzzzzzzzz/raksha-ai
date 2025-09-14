@@ -19,8 +19,14 @@ export function simpleTriage(input: TriageInput): TriageResult {
       reasons,
       microEducation,
       seasonalContext: getSeasonalContext(input),
-      topConditions: ['Respiratory Emergency'],
-      differentialDiagnosis: ['Acute respiratory distress', 'Pneumonia', 'Asthma attack']
+      topConditions: [{
+        condition: 'Respiratory Emergency',
+        likelihood: 0.9,
+        why: 'Gejala sesak napas memerlukan penanganan darurat'
+      }],
+      matchedKeywords: ['sesak', 'napas', 'breathing'],
+      reasoningLLM: 'Gejala sesak napas merupakan tanda darurat medis yang memerlukan penanganan segera di IGD.',
+      extracted: null
     }
   }
 
@@ -35,8 +41,14 @@ export function simpleTriage(input: TriageInput): TriageResult {
       reasons,
       microEducation,
       seasonalContext: getSeasonalContext(input),
-      topConditions: ['Bleeding'],
-      differentialDiagnosis: ['Trauma', 'Internal bleeding', 'Hemorrhage']
+      topConditions: [{
+        condition: 'Bleeding',
+        likelihood: 0.85,
+        why: 'Pendarahan memerlukan evaluasi medis segera'
+      }],
+      matchedKeywords: ['pendarahan', 'berdarah', 'bleeding'],
+      reasoningLLM: 'Pendarahan merupakan kondisi darurat yang memerlukan penanganan medis segera untuk mencegah kehilangan darah berlebihan.',
+      extracted: null
     }
   }
 
@@ -51,8 +63,14 @@ export function simpleTriage(input: TriageInput): TriageResult {
       reasons,
       microEducation,
       seasonalContext: getSeasonalContext(input),
-      topConditions: ['Chest Pain'],
-      differentialDiagnosis: ['Heart attack', 'Angina', 'Pulmonary embolism']
+      topConditions: [{
+        condition: 'Chest Pain',
+        likelihood: 0.8,
+        why: 'Nyeri dada memerlukan evaluasi medis segera'
+      }],
+      matchedKeywords: ['nyeri dada', 'sakit dada', 'chest pain'],
+      reasoningLLM: 'Nyeri dada merupakan gejala serius yang dapat mengindikasikan masalah jantung atau paru-paru yang memerlukan evaluasi medis segera.',
+      extracted: null
     }
   }
 
@@ -143,7 +161,9 @@ export function simpleTriage(input: TriageInput): TriageResult {
     microEducation,
     seasonalContext: seasonal,
     topConditions: getTopConditions(symptoms),
-    differentialDiagnosis: getDifferentialDiagnosis(symptoms)
+    matchedKeywords: getMatchedKeywords(symptoms),
+    reasoningLLM: getReasoningLLM(level, symptoms, score),
+    extracted: null
   }
 }
 
@@ -168,33 +188,80 @@ function getSeasonalContext(input: TriageInput): string | undefined {
   return undefined
 }
 
-function getTopConditions(symptoms: string): string[] {
-  const conditions: string[] = []
+function getTopConditions(symptoms: string): Array<{condition: string, likelihood: number, why: string}> {
+  const conditions: Array<{condition: string, likelihood: number, why: string}> = []
   
-  if (symptoms.includes('demam')) conditions.push('Fever')
-  if (symptoms.includes('batuk')) conditions.push('Cough')
-  if (symptoms.includes('mual')) conditions.push('Nausea')
-  if (symptoms.includes('pusing')) conditions.push('Dizziness')
-  if (symptoms.includes('lemas')) conditions.push('Weakness')
-  if (symptoms.includes('ruam')) conditions.push('Rash')
+  if (symptoms.includes('demam')) {
+    conditions.push({
+      condition: 'Fever',
+      likelihood: 0.7,
+      why: 'Gejala demam terdeteksi'
+    })
+  }
+  if (symptoms.includes('batuk')) {
+    conditions.push({
+      condition: 'Cough',
+      likelihood: 0.6,
+      why: 'Gejala batuk terdeteksi'
+    })
+  }
+  if (symptoms.includes('mual')) {
+    conditions.push({
+      condition: 'Nausea',
+      likelihood: 0.5,
+      why: 'Gejala mual terdeteksi'
+    })
+  }
+  if (symptoms.includes('pusing')) {
+    conditions.push({
+      condition: 'Dizziness',
+      likelihood: 0.4,
+      why: 'Gejala pusing terdeteksi'
+    })
+  }
+  if (symptoms.includes('lemas')) {
+    conditions.push({
+      condition: 'Weakness',
+      likelihood: 0.5,
+      why: 'Gejala lemas terdeteksi'
+    })
+  }
+  if (symptoms.includes('ruam')) {
+    conditions.push({
+      condition: 'Rash',
+      likelihood: 0.6,
+      why: 'Gejala ruam terdeteksi'
+    })
+  }
   
-  return conditions.length > 0 ? conditions : ['General symptoms']
+  return conditions.length > 0 ? conditions : [{
+    condition: 'General symptoms',
+    likelihood: 0.3,
+    why: 'Gejala umum terdeteksi'
+  }]
 }
 
-function getDifferentialDiagnosis(symptoms: string): string[] {
-  const diagnosis: string[] = []
+function getMatchedKeywords(symptoms: string): string[] {
+  const keywords: string[] = []
+  const symptomWords = ['demam', 'batuk', 'mual', 'pusing', 'lemas', 'ruam', 'muntah', 'sesak', 'napas', 'nyeri', 'dada']
   
-  if (symptoms.includes('demam') && symptoms.includes('batuk')) {
-    diagnosis.push('Upper respiratory infection', 'Flu', 'Common cold')
+  symptomWords.forEach(word => {
+    if (symptoms.includes(word)) {
+      keywords.push(word)
+    }
+  })
+  
+  return keywords.length > 0 ? keywords : ['gejala umum']
+}
+
+function getReasoningLLM(level: string, symptoms: string, score: number): string {
+  const baseReasoning = `Berdasarkan analisis gejala "${symptoms.substring(0, 50)}...", sistem menilai tingkat risiko ${level} dengan skor ${score}/100. `
+  
+  if (level === 'EMERGENCY') {
+    return baseReasoning + 'Gejala menunjukkan kondisi darurat yang memerlukan penanganan medis segera di IGD.'
+  } else if (level === 'CONSULT') {
+    return baseReasoning + 'Gejala memerlukan konsultasi dengan dokter dalam 24-48 jam untuk evaluasi lebih lanjut.'
+  } else {
+    return baseReasoning + 'Gejala dapat diatasi dengan perawatan mandiri, namun konsultasi dokter dianjurkan jika kondisi memburuk.'
   }
-  
-  if (symptoms.includes('demam') && symptoms.includes('ruam')) {
-    diagnosis.push('Viral infection', 'Allergic reaction', 'Dengue fever')
-  }
-  
-  if (symptoms.includes('mual') && symptoms.includes('muntah')) {
-    diagnosis.push('Gastroenteritis', 'Food poisoning', 'Stomach flu')
-  }
-  
-  return diagnosis.length > 0 ? diagnosis : ['Symptomatic evaluation needed']
 }
