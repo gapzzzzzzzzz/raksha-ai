@@ -1,0 +1,150 @@
+import { forwardRef } from 'react'
+import { cn } from '@/lib/utils'
+
+interface FormFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label: string
+  error?: string
+  help?: string
+  icon?: React.ReactNode
+}
+
+export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
+  ({ label, error, help, icon, className, ...props }, ref) => {
+    return (
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-rk-text">
+          {label}
+        </label>
+        <div className="relative">
+          {icon && (
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-rk-subtle">
+              {icon}
+            </div>
+          )}
+          <input
+            ref={ref}
+            className={cn(
+              "w-full px-4 py-3 bg-rk-surface border border-rk-border rounded-2xl text-rk-text placeholder-rk-subtle transition-colors rk-focus",
+              "hover:border-rk-primary/50 focus:border-rk-primary",
+              error && "border-rk-danger focus:border-rk-danger",
+              icon && "pl-10",
+              className
+            )}
+            {...props}
+          />
+        </div>
+        {help && !error && (
+          <p className="text-sm text-rk-subtle">{help}</p>
+        )}
+        {error && (
+          <p className="text-sm text-rk-danger">{error}</p>
+        )}
+      </div>
+    )
+  }
+)
+
+FormField.displayName = 'FormField'
+
+interface TextareaFieldProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+  label: string
+  error?: string
+  help?: string
+  icon?: React.ReactNode
+}
+
+export const TextareaField = forwardRef<HTMLTextAreaElement, TextareaFieldProps>(
+  ({ label, error, help, icon, className, ...props }, ref) => {
+    return (
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-rk-text">
+          {label}
+        </label>
+        <div className="relative">
+          {icon && (
+            <div className="absolute left-3 top-3 text-rk-subtle">
+              {icon}
+            </div>
+          )}
+          <textarea
+            ref={ref}
+            className={cn(
+              "w-full px-4 py-3 bg-rk-surface border border-rk-border rounded-2xl text-rk-text placeholder-rk-subtle transition-colors rk-focus resize-none",
+              "hover:border-rk-primary/50 focus:border-rk-primary",
+              error && "border-rk-danger focus:border-rk-danger",
+              icon && "pl-10",
+              className
+            )}
+            {...props}
+          />
+        </div>
+        {help && !error && (
+          <p className="text-sm text-rk-subtle">{help}</p>
+        )}
+        {error && (
+          <p className="text-sm text-rk-danger">{error}</p>
+        )}
+      </div>
+    )
+  }
+)
+
+TextareaField.displayName = 'TextareaField'
+
+interface SelectFieldProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+  label: string
+  error?: string
+  help?: string
+  icon?: React.ReactNode
+  options: { value: string; label: string }[]
+}
+
+export const SelectField = forwardRef<HTMLSelectElement, SelectFieldProps>(
+  ({ label, error, help, icon, options, className, ...props }, ref) => {
+    return (
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-rk-text">
+          {label}
+        </label>
+        <div className="relative">
+          {icon && (
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-rk-subtle">
+              {icon}
+            </div>
+          )}
+          <select
+            ref={ref}
+            className={cn(
+              "w-full px-4 py-3 bg-rk-surface border border-rk-border rounded-2xl text-rk-text transition-colors rk-focus appearance-none",
+              "hover:border-rk-primary/50 focus:border-rk-primary",
+              error && "border-rk-danger focus:border-rk-danger",
+              icon && "pl-10",
+              className
+            )}
+            {...props}
+          >
+            <option value="">Pilih {label.toLowerCase()}</option>
+            {options.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-rk-subtle pointer-events-none">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
+        {help && !error && (
+          <p className="text-sm text-rk-subtle">{help}</p>
+        )}
+        {error && (
+          <p className="text-sm text-rk-danger">{error}</p>
+        )}
+      </div>
+    )
+  }
+)
+
+SelectField.displayName = 'SelectField'

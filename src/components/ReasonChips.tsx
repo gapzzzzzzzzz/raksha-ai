@@ -1,16 +1,19 @@
+import { cn } from '@/lib/utils'
+
 interface ReasonChipsProps {
   reasons: string[]
+  className?: string
 }
 
-export function ReasonChips({ reasons }: ReasonChipsProps) {
+export function ReasonChips({ reasons, className }: ReasonChipsProps) {
   if (reasons.length === 0) return null
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className={cn("flex flex-wrap gap-2", className)}>
       {reasons.map((reason, index) => (
         <span
           key={index}
-          className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+          className="rk-chip bg-rk-primary/10 text-rk-primary border border-rk-primary/20"
         >
           {reason}
         </span>

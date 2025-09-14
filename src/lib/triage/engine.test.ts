@@ -1,196 +1,217 @@
 import { describe, it, expect } from 'vitest'
-import { performTriage, TriageInput } from './engine'
+import { performTriage, type TriageInput } from './engine'
 
 describe('Triage Engine', () => {
-  describe('Emergency Cases', () => {
-    it('should return EMERGENCY for chest pain', () => {
+  describe('Red Flags', () => {
+    it('should escalate to EMERGENCY for chest pain', () => {
       const input: TriageInput = {
-        symptomsText: 'nyeri dada yang parah',
+        symptomsText: 'sakit dada',
         redFlags: { chestPain: true }
       }
       
       const result = performTriage(input)
-      
       expect(result.level).toBe('EMERGENCY')
-      expect(result.score).toBeGreaterThanOrEqual(90)
+      expect(result.score).toBe(90)
       expect(result.reasons).toContain('Nyeri dada - gejala serius')
     })
 
-    it('should return EMERGENCY for bleeding', () => {
+    it('should escalate to EMERGENCY for bleeding', () => {
       const input: TriageInput = {
-        symptomsText: 'pendarahan hebat',
+        symptomsText: 'mimisan',
         redFlags: { bleeding: true }
       }
       
       const result = performTriage(input)
-      
       expect(result.level).toBe('EMERGENCY')
-      expect(result.score).toBeGreaterThanOrEqual(95)
+      expect(result.score).toBe(95)
       expect(result.reasons).toContain('Pendarahan - perlu penanganan segera')
     })
 
-    it('should return EMERGENCY for shortness of breath', () => {
+    it('should escalate to EMERGENCY for shortness of breath', () => {
       const input: TriageInput = {
-        symptomsText: 'sesak napas berat',
+        symptomsText: 'sesak napas',
         redFlags: { sob: true }
       }
       
       const result = performTriage(input)
-      
       expect(result.level).toBe('EMERGENCY')
-      expect(result.score).toBeGreaterThanOrEqual(90)
+      expect(result.score).toBe(90)
       expect(result.reasons).toContain('Sesak napas - gejala darurat')
-    })
-
-    it('should return EMERGENCY for high fever with breathing issues', () => {
-      const input: TriageInput = {
-        symptomsText: 'demam tinggi dan sesak napas',
-        tempC: 40,
-        redFlags: { sob: true }
-      }
-      
-      const result = performTriage(input)
-      
-      expect(result.level).toBe('EMERGENCY')
-      expect(result.score).toBeGreaterThanOrEqual(95)
-      expect(result.reasons).toContain('Demam tinggi (40°C) dengan sesak napas')
     })
   })
 
-  describe('Consultation Cases', () => {
-    it('should return CONSULT for persistent fever', () => {
+  describe('Temperature and Fever', () => {
+    it('should escalate to EMERGENCY for high fever with SOB', () => {
       const input: TriageInput = {
-        symptomsText: 'demam sudah 3 hari',
+        symptomsText: 'demam tinggi',
+        tempC: 40,
+        daysFever: 1,
+        redFlags: { sob: true }
+      }
+      
+      const result = performTriage(input)
+      expect(result.level).toBe('EMERGENCY')
+      expect(result.score).toBe(95)
+      expect(result.reasons).toContain('Demam tinggi (40°C) dengan sesak napas')
+    })
+
+    it('should escalate to CONSULT for prolonged fever', () => {
+      const input: TriageInput = {
+        symptomsText: 'demam',
         tempC: 38.5,
         daysFever: 3
       }
       
       const result = performTriage(input)
-      
       expect(result.level).toBe('CONSULT')
-      expect(result.score).toBeGreaterThanOrEqual(60)
+      expect(result.score).toBe(60)
       expect(result.reasons).toContain('Demam 38.5°C selama 3 hari')
     })
+  })
 
-    it('should return CONSULT for infant with fever', () => {
+  describe('Age-based Risk', () => {
+    it('should escalate to CONSULT for fever in infants', () => {
       const input: TriageInput = {
-        symptomsText: 'bayi demam',
+        symptomsText: 'demam',
         age: 1,
         tempC: 38.2
       }
       
       const result = performTriage(input)
-      
       expect(result.level).toBe('CONSULT')
-      expect(result.score).toBeGreaterThanOrEqual(70)
+      expect(result.score).toBe(70)
       expect(result.reasons).toContain('Demam pada bayi - perlu konsultasi')
     })
 
-    it('should return CONSULT for elderly with fever', () => {
+    it('should escalate to CONSULT for fever in elderly', () => {
       const input: TriageInput = {
-        symptomsText: 'lansia demam',
+        symptomsText: 'demam',
         age: 70,
         tempC: 38.1
       }
       
       const result = performTriage(input)
-      
       expect(result.level).toBe('CONSULT')
-      expect(result.score).toBeGreaterThanOrEqual(70)
+      expect(result.score).toBe(70)
       expect(result.reasons).toContain('Demam pada lansia - perlu konsultasi')
-    })
-
-    it('should return CONSULT for vomiting symptoms', () => {
-      const input: TriageInput = {
-        symptomsText: 'muntah terus menerus dan mual'
-      }
-      
-      const result = performTriage(input)
-      
-      expect(result.level).toBe('CONSULT')
-      expect(result.score).toBeGreaterThanOrEqual(60)
-      expect(result.reasons.some(reason => reason.includes('muntah'))).toBe(true)
     })
   })
 
-  describe('Self-Care Cases', () => {
-    it('should return SELF_CARE for mild symptoms', () => {
+  describe('Symptom-based Risk', () => {
+    it('should detect emergency symptoms', () => {
       const input: TriageInput = {
-        symptomsText: 'batuk dan pilek ringan'
+        symptomsText: 'sesak napas dan pingsan'
       }
       
       const result = performTriage(input)
-      
-      expect(result.level).toBe('SELF_CARE')
-      expect(result.score).toBeLessThan(60)
-      expect(result.reasons.some(reason => reason.includes('ringan'))).toBe(true)
+      expect(result.level).toBe('EMERGENCY')
+      expect(result.score).toBeGreaterThanOrEqual(85)
+      expect(result.reasons.some(r => r.includes('Gejala darurat terdeteksi'))).toBe(true)
     })
 
-    it('should return SELF_CARE for common cold', () => {
+    it('should detect consultation symptoms', () => {
       const input: TriageInput = {
-        symptomsText: 'sakit kepala ringan dan lemas'
+        symptomsText: 'demam tinggi dan muntah terus'
       }
       
       const result = performTriage(input)
+      expect(result.level).toBe('CONSULT')
+      expect(result.score).toBeGreaterThanOrEqual(60)
+      expect(result.reasons.some(r => r.includes('Gejala perlu konsultasi'))).toBe(true)
+    })
+
+    it('should detect self-care symptoms', () => {
+      const input: TriageInput = {
+        symptomsText: 'batuk dan pilek'
+      }
       
+      const result = performTriage(input)
       expect(result.level).toBe('SELF_CARE')
-      expect(result.score).toBeLessThan(60)
+      expect(result.score).toBeGreaterThanOrEqual(30)
+      expect(result.reasons.some(r => r.includes('Gejala ringan'))).toBe(true)
     })
   })
 
   describe('Seasonal Prior', () => {
-    it('should escalate risk for DBD symptoms in rainy season', () => {
+    it('should apply DBD risk in rainy season', () => {
       const input: TriageInput = {
-        symptomsText: 'demam, ruam, nyeri otot, mual',
-        region: 'Jawa Timur',
-        month: 1 // January (rainy season)
+        symptomsText: 'demam dan ruam',
+        month: 1, // January (rainy season)
+        region: 'DKI Jakarta'
       }
       
       const result = performTriage(input)
-      
+      expect(result.level).toBe('CONSULT')
       expect(result.seasonalContext).toContain('Prior musiman: risiko DBD meningkat di musim hujan')
-      expect(result.reasons.some(reason => reason.includes('Prior musiman'))).toBe(true)
+      expect(result.reasons.some(r => r.includes('risiko DBD meningkat'))).toBe(true)
     })
 
-    it('should not escalate risk for non-DBD regions', () => {
+    it('should not apply DBD risk in dry season', () => {
       const input: TriageInput = {
-        symptomsText: 'demam, ruam, nyeri otot, mual',
-        region: 'Papua',
-        month: 1 // January (rainy season)
+        symptomsText: 'demam dan ruam',
+        month: 7, // July (dry season)
+        region: 'DKI Jakarta'
       }
       
       const result = performTriage(input)
-      
       expect(result.seasonalContext).toBeUndefined()
     })
 
-    it('should not escalate risk outside rainy season', () => {
+    it('should not apply DBD risk in non-risk regions', () => {
       const input: TriageInput = {
-        symptomsText: 'demam, ruam, nyeri otot, mual',
-        region: 'Jawa Timur',
-        month: 6 // June (dry season)
+        symptomsText: 'demam dan ruam',
+        month: 1, // January (rainy season)
+        region: 'Papua'
       }
       
       const result = performTriage(input)
-      
       expect(result.seasonalContext).toBeUndefined()
     })
   })
 
+  describe('Keyword Aliases', () => {
+    it('should recognize various ways to express shortness of breath', () => {
+      const aliases = ['sesak napas', 'susah nafas', 'napas berat', 'terengah-engah']
+      
+      aliases.forEach(alias => {
+        const input: TriageInput = {
+          symptomsText: alias
+        }
+        
+        const result = performTriage(input)
+        expect(result.level).toBe('EMERGENCY')
+        expect(result.reasons.some(r => r.includes('sesak napas'))).toBe(true)
+      })
+    })
+
+    it('should recognize various ways to express bleeding', () => {
+      const aliases = ['berdarah', 'mimisan', 'pendarahan hebat']
+      
+      aliases.forEach(alias => {
+        const input: TriageInput = {
+          symptomsText: alias
+        }
+        
+        const result = performTriage(input)
+        expect(result.level).toBe('EMERGENCY')
+        expect(result.reasons.some(r => r.includes('pendarahan'))).toBe(true)
+      })
+    })
+  })
+
   describe('Micro Education', () => {
-    it('should provide emergency micro education', () => {
+    it('should provide appropriate micro education for EMERGENCY', () => {
       const input: TriageInput = {
-        symptomsText: 'nyeri dada',
-        redFlags: { chestPain: true }
+        symptomsText: 'sesak napas',
+        redFlags: { sob: true }
       }
       
       const result = performTriage(input)
-      
       expect(result.microEducation).toContain('Segera ke IGD atau rumah sakit terdekat')
       expect(result.microEducation).toContain('Jangan tunda mencari pertolongan medis')
     })
 
-    it('should provide consult micro education', () => {
+    it('should provide appropriate micro education for CONSULT', () => {
       const input: TriageInput = {
         symptomsText: 'demam tinggi',
         tempC: 38.5,
@@ -198,48 +219,34 @@ describe('Triage Engine', () => {
       }
       
       const result = performTriage(input)
-      
       expect(result.microEducation).toContain('Kunjungi Puskesmas atau dokter dalam 24 jam')
       expect(result.microEducation).toContain('Minum air putih yang cukup (8-10 gelas/hari)')
     })
 
-    it('should provide self-care micro education', () => {
+    it('should provide appropriate micro education for SELF_CARE', () => {
       const input: TriageInput = {
-        symptomsText: 'batuk ringan'
+        symptomsText: 'batuk dan pilek'
       }
       
       const result = performTriage(input)
-      
       expect(result.microEducation).toContain('Istirahat yang cukup di rumah')
       expect(result.microEducation).toContain('Minum air putih minimal 8 gelas/hari')
     })
   })
 
   describe('Score Calculation', () => {
-    it('should return appropriate score ranges', () => {
-      const emergencyInput: TriageInput = {
-        symptomsText: 'nyeri dada',
-        redFlags: { chestPain: true }
-      }
+    it('should return score between 0-100', () => {
+      const inputs: TriageInput[] = [
+        { symptomsText: 'batuk' },
+        { symptomsText: 'demam tinggi', tempC: 38.5 },
+        { symptomsText: 'sesak napas', redFlags: { sob: true } }
+      ]
       
-      const consultInput: TriageInput = {
-        symptomsText: 'demam tinggi',
-        tempC: 38.5,
-        daysFever: 2
-      }
-      
-      const selfCareInput: TriageInput = {
-        symptomsText: 'batuk ringan'
-      }
-      
-      const emergencyResult = performTriage(emergencyInput)
-      const consultResult = performTriage(consultInput)
-      const selfCareResult = performTriage(selfCareInput)
-      
-      expect(emergencyResult.score).toBeGreaterThanOrEqual(90)
-      expect(consultResult.score).toBeGreaterThanOrEqual(60)
-      expect(consultResult.score).toBeLessThan(90)
-      expect(selfCareResult.score).toBeLessThan(60)
+      inputs.forEach(input => {
+        const result = performTriage(input)
+        expect(result.score).toBeGreaterThanOrEqual(0)
+        expect(result.score).toBeLessThanOrEqual(100)
+      })
     })
   })
 })

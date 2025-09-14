@@ -1,110 +1,158 @@
-import { TriageResult } from '@/lib/triage/engine'
-import { AlertTriangle, HeartPulse, Activity } from 'lucide-react'
+import { AlertTriangle, Clock, HeartPulse, MapPin, ExternalLink, Info } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
-interface RiskCardProps {
-  result: TriageResult
+export interface RiskCardProps {
+  level: 'EMERGENCY' | 'CONSULT' | 'SELF_CARE'
+  score: number
+  reasons: string[]
+  microEducation: string[]
+  seasonalContext?: string
+  region?: string
 }
 
-export function RiskCard({ result }: RiskCardProps) {
-  const getRiskConfig = (level: string) => {
-    switch (level) {
-      case 'EMERGENCY':
-        return {
-          color: 'bg-red-500',
-          textColor: 'text-red-500',
-          borderColor: 'border-red-500',
-          icon: AlertTriangle,
-          label: 'DARURAT',
-          bgColor: 'bg-red-50 dark:bg-red-950'
-        }
-      case 'CONSULT':
-        return {
-          color: 'bg-amber-500',
-          textColor: 'text-amber-500',
-          borderColor: 'border-amber-500',
-          icon: HeartPulse,
-          label: 'KONSULTASI',
-          bgColor: 'bg-amber-50 dark:bg-amber-950'
-        }
-      case 'SELF_CARE':
-        return {
-          color: 'bg-green-500',
-          textColor: 'text-green-500',
-          borderColor: 'border-green-500',
-          icon: Activity,
-          label: 'PERAWATAN DIRI',
-          bgColor: 'bg-green-50 dark:bg-green-950'
-        }
-      default:
-        return {
-          color: 'bg-gray-500',
-          textColor: 'text-gray-500',
-          borderColor: 'border-gray-500',
-          icon: Activity,
-          label: 'TIDAK DIKETAHUI',
-          bgColor: 'bg-gray-50 dark:bg-gray-950'
-        }
-    }
+const riskConfig = {
+  EMERGENCY: {
+    color: 'text-rk-danger',
+    bgColor: 'bg-rk-danger/10',
+    borderColor: 'border-rk-danger/50',
+    icon: AlertTriangle,
+    label: 'DARURAT',
+    description: 'Segera ke IGD',
+    action: 'Hubungi 118/119 atau ke IGD terdekat'
+  },
+  CONSULT: {
+    color: 'text-rk-warn',
+    bgColor: 'bg-rk-warn/10',
+    borderColor: 'border-rk-warn/50',
+    icon: Clock,
+    label: 'KONSULTASI',
+    description: 'Konsultasi dalam 24 jam',
+    action: 'Kunjungi Puskesmas atau dokter'
+  },
+  SELF_CARE: {
+    color: 'text-rk-accent',
+    bgColor: 'bg-rk-accent/10',
+    borderColor: 'border-rk-accent/50',
+    icon: HeartPulse,
+    label: 'PERAWATAN DIRI',
+    description: 'Perawatan di rumah',
+    action: 'Ikuti panduan perawatan di bawah'
   }
+}
 
-  const config = getRiskConfig(result.level)
+export function RiskCard({ 
+  level, 
+  score, 
+  reasons, 
+  microEducation, 
+  seasonalContext,
+  region 
+}: RiskCardProps) {
+  const config = riskConfig[level]
   const Icon = config.icon
 
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return 'text-rk-danger'
+    if (score >= 60) return 'text-rk-warn'
+    return 'text-rk-accent'
+  }
+
+  const getMapsUrl = (region?: string) => {
+    if (!region) return 'https://maps.google.com/maps?q=rumah+sakit+terdekat'
+    return `https://maps.google.com/maps?q=rumah+sakit+terdekat+${encodeURIComponent(region)}`
+  }
+
   return (
-    <div className={`rounded-2xl border-2 ${config.borderColor} ${config.bgColor} p-6 shadow-md`}>
-      <div className="flex items-center gap-4 mb-4">
-        <div className={`p-3 rounded-full ${config.color} text-white`}>
-          <Icon className="w-6 h-6" />
+    <div className={cn(
+      "rk-card p-6 space-y-6",
+      config.borderColor
+    )}>
+      {/* Header */}
+      <div className="text-center">
+        <div className={cn(
+          "w-20 h-20 mx-auto mb-4 rounded-2xl flex items-center justify-center",
+          config.bgColor
+        )}>
+          <Icon className={cn("w-10 h-10", config.color)} />
         </div>
-        <div>
-          <h3 className={`text-xl font-bold ${config.textColor}`}>
-            {config.label}
-          </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Skor Risiko: {result.score}/100
-          </p>
+        <h3 className={cn("text-2xl font-display font-bold mb-2", config.color)}>
+          {config.label}
+        </h3>
+        <p className="text-rk-subtle mb-4">{config.description}</p>
+        
+        {/* Score */}
+        <div className="flex items-center justify-center gap-2">
+          <span className="text-sm text-rk-subtle">Skor:</span>
+          <span className={cn("text-3xl font-bold", getScoreColor(score))}>
+            {score}
+          </span>
+          <span className="text-sm text-rk-subtle">/100</span>
         </div>
       </div>
 
-      {result.reasons.length > 0 && (
-        <div className="mb-4">
-          <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">
-            Alasan Penilaian:
-          </h4>
-          <ul className="space-y-1">
-            {result.reasons.map((reason, index) => (
-              <li key={index} className="text-sm text-gray-700 dark:text-gray-300">
-                • {reason}
-              </li>
-            ))}
-          </ul>
+      {/* Seasonal Context */}
+      {seasonalContext && (
+        <div className="bg-rk-primary/10 border border-rk-primary/20 rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <Info className="w-5 h-5 text-rk-primary mt-0.5 flex-shrink-0" />
+            <div>
+              <h4 className="font-semibold text-rk-primary text-sm mb-1">
+                Konteks Musiman
+              </h4>
+              <p className="text-rk-text text-sm">{seasonalContext}</p>
+            </div>
+          </div>
         </div>
       )}
 
-      {result.seasonalContext && (
-        <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
-          <p className="text-sm text-blue-800 dark:text-blue-200">
-            🌧️ {result.seasonalContext}
-          </p>
-        </div>
-      )}
-
-      <div className="mb-4">
-        <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">
-          Panduan Perawatan:
+      {/* Reasons */}
+      <div>
+        <h4 className="font-semibold text-rk-text mb-3 flex items-center gap-2">
+          <span>Mengapa level ini?</span>
         </h4>
-        <ul className="space-y-1">
-          {result.microEducation.map((education, index) => (
-            <li key={index} className="text-sm text-gray-700 dark:text-gray-300">
-              • {education}
-            </li>
+        <div className="space-y-2">
+          {reasons.map((reason, index) => (
+            <div key={index} className="flex items-start gap-2">
+              <div className="w-1.5 h-1.5 bg-rk-primary rounded-full mt-2 flex-shrink-0" />
+              <span className="text-rk-subtle text-sm">{reason}</span>
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
 
-      <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg">
-        <p className="text-xs text-yellow-800 dark:text-yellow-200">
-          ⚠️ <strong>PENTING:</strong> Ini bukan diagnosis medis. Konsultasikan dengan dokter untuk penanganan yang tepat.
+      {/* Micro Education */}
+      <div>
+        <h4 className="font-semibold text-rk-text mb-3">
+          Langkah Aman Saat Ini
+        </h4>
+        <div className="space-y-2">
+          {microEducation.map((item, index) => (
+            <div key={index} className="flex items-start gap-2">
+              <div className="w-1.5 h-1.5 bg-rk-accent rounded-full mt-2 flex-shrink-0" />
+              <span className="text-rk-subtle text-sm">{item}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Action Button */}
+      <div className="pt-4 border-t border-rk-border">
+        <a
+          href={getMapsUrl(region)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="rk-button-primary w-full flex items-center justify-center gap-2"
+        >
+          <MapPin className="w-4 h-4" />
+          Buka Maps Fasilitas Terdekat
+          <ExternalLink className="w-4 h-4" />
+        </a>
+      </div>
+
+      {/* Disclaimer */}
+      <div className="text-xs text-rk-subtle text-center pt-2 border-t border-rk-border">
+        <p>
+          Raksha bukan alat diagnosis. Jika ragu atau kondisi memburuk, segera ke IGD.
         </p>
       </div>
     </div>

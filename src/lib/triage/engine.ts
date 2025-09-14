@@ -24,27 +24,34 @@ export type TriageResult = {
 const SYMPTOM_KEYWORDS = {
   // Emergency symptoms
   emergency: {
-    'sesak napas': ['sesak', 'napas pendek', 'sulit bernapas', 'terengah-engah'],
-    'pendarahan': ['berdarah', 'mimisan', 'darah', 'perdarahan'],
-    'nyeri dada': ['sakit dada', 'dada sakit', 'nyeri di dada'],
-    'pingsan': ['tidak sadar', 'hilang kesadaran', 'pingsan'],
-    'kejang': ['kejang-kejang', 'kram', 'spasme']
+    'sesak napas': ['sesak', 'napas pendek', 'sulit bernapas', 'terengah-engah', 'susah nafas', 'napas berat', 'sesak nafas'],
+    'pendarahan': ['berdarah', 'mimisan', 'darah', 'perdarahan', 'pendarahan hebat', 'mimisan hebat'],
+    'nyeri dada': ['sakit dada', 'dada sakit', 'nyeri di dada', 'dada terasa sakit'],
+    'pingsan': ['tidak sadar', 'hilang kesadaran', 'pingsan', 'collapsed'],
+    'kejang': ['kejang-kejang', 'kram', 'spasme', 'kejang'],
+    'sulit bicara': ['bicara tidak jelas', 'lidah kaku', 'sulit mengucap'],
+    'lumpuh': ['tidak bisa bergerak', 'anggota tubuh lemah', 'paralysis']
   },
   // Consultation symptoms
   consult: {
-    'demam tinggi': ['panas tinggi', 'demam', 'fever'],
-    'muntah terus': ['muntah berulang', 'muntah-muntah', 'muntah terus menerus'],
-    'ruam': ['bintik-bintik', 'kemerahan', 'gatal-gatal', 'eksim'],
-    'sakit kepala parah': ['pusing berat', 'sakit kepala hebat'],
-    'nyeri perut': ['sakit perut', 'perut sakit', 'kram perut']
+    'demam tinggi': ['panas tinggi', 'demam', 'fever', 'panas badan'],
+    'muntah terus': ['muntah berulang', 'muntah-muntah', 'muntah terus menerus', 'muntah berkepanjangan'],
+    'ruam': ['bintik-bintik', 'kemerahan', 'gatal-gatal', 'eksim', 'bintik merah'],
+    'sakit kepala parah': ['pusing berat', 'sakit kepala hebat', 'kepala sakit sekali'],
+    'nyeri perut': ['sakit perut', 'perut sakit', 'kram perut', 'perut melilit'],
+    'diare parah': ['mencret terus', 'diare berkepanjangan', 'buang air terus'],
+    'sulit menelan': ['tidak bisa menelan', 'tenggorokan sakit', 'sulit makan'],
+    'nyeri sendi': ['sendi sakit', 'persendian nyeri', 'rematik']
   },
   // Self-care symptoms
   selfcare: {
-    'batuk': ['batuk-batuk', 'cough'],
-    'pilek': ['hidung tersumbat', 'ingusan', 'flu'],
-    'sakit kepala ringan': ['pusing ringan', 'sakit kepala biasa'],
-    'lemas': ['tidak bertenaga', 'capek', 'lelah'],
-    'mual': ['mual-mual', 'mual ringan']
+    'batuk': ['batuk-batuk', 'cough', 'batuk ringan'],
+    'pilek': ['hidung tersumbat', 'ingusan', 'flu', 'hidung meler'],
+    'sakit kepala ringan': ['pusing ringan', 'sakit kepala biasa', 'kepala pusing'],
+    'lemas': ['tidak bertenaga', 'capek', 'lelah', 'tidak bersemangat'],
+    'mual': ['mual-mual', 'mual ringan', 'perut mual'],
+    'hidung tersumbat': ['pilek', 'hidung mampet', 'susah bernapas lewat hidung'],
+    'sakit tenggorokan': ['tenggorokan sakit', 'radang tenggorokan ringan']
   }
 }
 
@@ -89,26 +96,28 @@ function normalizeText(text: string): string {
     .trim()
 }
 
-function findMatchingSymptoms(symptomsText: string): { category: string, symptoms: string[] }[] {
+function findMatchingSymptoms(symptomsText: string): { category: string, symptoms: string[], matchedKeywords: string[] }[] {
   const normalized = normalizeText(symptomsText)
-  const matches: { category: string, symptoms: string[] }[] = []
+  const matches: { category: string, symptoms: string[], matchedKeywords: string[] }[] = []
 
   for (const [category, symptoms] of Object.entries(SYMPTOM_KEYWORDS)) {
     const foundSymptoms: string[] = []
+    const matchedKeywords: string[] = []
     
     for (const [mainSymptom, aliases] of Object.entries(symptoms)) {
       const allVariants = [mainSymptom, ...aliases]
-      const found = allVariants.some(variant => 
+      const foundVariant = allVariants.find(variant => 
         normalized.includes(variant.toLowerCase())
       )
       
-      if (found) {
+      if (foundVariant) {
         foundSymptoms.push(mainSymptom)
+        matchedKeywords.push(foundVariant)
       }
     }
     
     if (foundSymptoms.length > 0) {
-      matches.push({ category, symptoms: foundSymptoms })
+      matches.push({ category, symptoms: foundSymptoms, matchedKeywords })
     }
   }
 
@@ -197,20 +206,20 @@ export function performTriage(input: TriageInput): TriageResult {
   }
 
   // Check symptom-based risk
-  for (const { category, symptoms: foundSymptoms } of symptoms) {
+  for (const { category, symptoms: foundSymptoms, matchedKeywords } of symptoms) {
     if (category === 'emergency') {
       riskLevel = "EMERGENCY"
-      reasons.push(`Gejala darurat: ${foundSymptoms.join(', ')}`)
+      reasons.push(`Gejala darurat terdeteksi: ${foundSymptoms.join(', ')} (kata kunci: ${matchedKeywords.join(', ')})`)
       score = Math.max(score, 85)
     } else if (category === 'consult') {
       if (riskLevel === "SELF_CARE") {
         riskLevel = "CONSULT"
-        reasons.push(`Gejala perlu konsultasi: ${foundSymptoms.join(', ')}`)
+        reasons.push(`Gejala perlu konsultasi: ${foundSymptoms.join(', ')} (kata kunci: ${matchedKeywords.join(', ')})`)
         score = Math.max(score, 60)
       }
     } else if (category === 'selfcare') {
       if (riskLevel === "SELF_CARE") {
-        reasons.push(`Gejala ringan: ${foundSymptoms.join(', ')}`)
+        reasons.push(`Gejala ringan: ${foundSymptoms.join(', ')} (kata kunci: ${matchedKeywords.join(', ')})`)
         score = Math.max(score, 30)
       }
     }
