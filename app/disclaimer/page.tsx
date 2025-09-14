@@ -1,4 +1,5 @@
 import { HeartPulse, AlertTriangle, Shield, FileText, Phone } from 'lucide-react'
+import Link from 'next/link'
 
 export default function DisclaimerPage() {
   return (
@@ -11,12 +12,12 @@ export default function DisclaimerPage() {
             <span className="text-2xl font-bold text-white">Raksha AI</span>
           </div>
           <div className="flex gap-4">
-            <a href="/" className="text-gray-300 hover:text-white transition-colors">
+            <Link href="/" className="text-gray-300 hover:text-white transition-colors">
               Home
-            </a>
-            <a href="/triage" className="text-gray-300 hover:text-white transition-colors">
+            </Link>
+            <Link href="/triage" className="text-gray-300 hover:text-white transition-colors">
               Triage
-            </a>
+            </Link>
           </div>
         </div>
       </nav>
@@ -136,7 +137,7 @@ export default function DisclaimerPage() {
                 <div>
                   <h3 className="text-lg font-semibold text-white mb-2">Tidak Ada Jaminan</h3>
                   <p className="text-gray-300">
-                    Raksha AI disediakan "sebagaimana adanya" tanpa jaminan apapun. 
+                    Raksha AI disediakan &quot;sebagaimana adanya&quot; tanpa jaminan apapun. 
                     Kami tidak menjamin keakuratan, kelengkapan, atau kesesuaian hasil triage untuk kebutuhan spesifik Anda.
                   </p>
                 </div>

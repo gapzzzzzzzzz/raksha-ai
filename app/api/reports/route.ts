@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     const risk = searchParams.get('risk')
 
     // Build filter conditions
-    const where: any = {}
+    const where: Record<string, unknown> = {}
     
     if (region) {
       where.region = region

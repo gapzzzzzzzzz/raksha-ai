@@ -10,7 +10,7 @@ const botSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { phone, message } = botSchema.parse(body)
+    const { message } = botSchema.parse(body)
     
     // Simple triage from message text
     const triageInput: TriageInput = {

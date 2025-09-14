@@ -9,6 +9,7 @@ import { ConsentSwitch } from '@/components/ConsentSwitch'
 import { TriageResult } from '@/lib/triage/engine'
 import { INDONESIAN_PROVINCES } from '@/lib/utils/regions'
 import { HeartPulse, MapPin, ExternalLink } from 'lucide-react'
+import Link from 'next/link'
 
 const triageSchema = z.object({
   symptomsText: z.string().min(1, 'Gejala harus diisi'),
@@ -88,9 +89,9 @@ export default function TriagePage() {
             <span className="text-2xl font-bold text-white">Raksha AI</span>
           </div>
           <div className="flex gap-4">
-            <a href="/" className="text-gray-300 hover:text-white transition-colors">
+            <Link href="/" className="text-gray-300 hover:text-white transition-colors">
               Home
-            </a>
+            </Link>
             <a href="/lite" className="text-gray-300 hover:text-white transition-colors">
               Lite
             </a>
@@ -262,7 +263,7 @@ export default function TriagePage() {
                     Hasil Triage Akan Muncul Di Sini
                   </h3>
                   <p className="text-gray-400">
-                    Isi form di sebelah kiri dan klik "Lakukan Triage" untuk melihat hasil
+                    Isi form di sebelah kiri dan klik &quot;Lakukan Triage&quot; untuk melihat hasil
                   </p>
                 </div>
               )}

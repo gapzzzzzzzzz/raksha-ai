@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { MapHeat } from '@/components/MapHeat'
 import { Charts } from '@/components/Charts'
 import { HeartPulse, MapPin, BarChart3, Filter } from 'lucide-react'
+import Link from 'next/link'
 
 interface ReportData {
   reports: Array<{
@@ -31,7 +32,7 @@ export default function DashboardPage() {
     risk: ''
   })
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true)
       const params = new URLSearchParams()
@@ -49,11 +50,11 @@ export default function DashboardPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [filters])
 
   useEffect(() => {
     fetchData()
-  }, [filters])
+  }, [fetchData])
 
   const getRegionCoordinates = (region: string) => {
     const coordinates: Record<string, { lat: number; lng: number }> = {
@@ -121,9 +122,9 @@ export default function DashboardPage() {
               <HeartPulse className="w-8 h-8 text-sky-500" />
               <span className="text-2xl font-bold text-white">Raksha AI Dashboard</span>
             </div>
-            <a href="/" className="text-gray-300 hover:text-white transition-colors">
+            <Link href="/" className="text-gray-300 hover:text-white transition-colors">
               Back to Home
-            </a>
+            </Link>
           </div>
         </div>
       </header>

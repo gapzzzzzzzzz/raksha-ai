@@ -50,7 +50,7 @@ export const DBD_HIGH_RISK_REGIONS = [
 ] as const
 
 export function isDBDRiskRegion(region: string): boolean {
-  return DBD_HIGH_RISK_REGIONS.includes(region as any)
+  return DBD_HIGH_RISK_REGIONS.includes(region as typeof DBD_HIGH_RISK_REGIONS[number])
 }
 
 export function getRegionCoordinates(region: string): { lat: number; lng: number } | null {

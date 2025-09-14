@@ -1,4 +1,5 @@
 import { HeartPulse, Shield, Eye, Lock, Database } from 'lucide-react'
+import Link from 'next/link'
 
 export default function PrivacyPage() {
   return (
@@ -11,12 +12,12 @@ export default function PrivacyPage() {
             <span className="text-2xl font-bold text-white">Raksha AI</span>
           </div>
           <div className="flex gap-4">
-            <a href="/" className="text-gray-300 hover:text-white transition-colors">
+            <Link href="/" className="text-gray-300 hover:text-white transition-colors">
               Home
-            </a>
-            <a href="/triage" className="text-gray-300 hover:text-white transition-colors">
+            </Link>
+            <Link href="/triage" className="text-gray-300 hover:text-white transition-colors">
               Triage
-            </a>
+            </Link>
           </div>
         </div>
       </nav>
