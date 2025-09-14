@@ -35,36 +35,85 @@
 
 /* Utility Classes */
 .rk-card {
-  @apply bg-rk-card border border-rk-border rounded-2xl shadow-md;
+  background-color: var(--rk-card);
+  border: 1px solid var(--rk-border);
+  border-radius: 1rem;
+  box-shadow: var(--rk-shadow-md);
 }
 
 .rk-chip {
-  @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
 .rk-badge {
-  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
 }
 
 .rk-button {
-  @apply inline-flex items-center justify-center px-4 py-2 rounded-2xl font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-rk-primary focus:ring-offset-2 focus:ring-offset-rk-bg;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  border-radius: 1rem;
+  font-weight: 500;
+  transition: colors 0.2s;
+  outline: none;
+}
+
+.rk-button:focus {
+  outline: none;
+  ring: 2px solid var(--rk-primary);
+  ring-offset: 2px;
+  ring-offset-color: var(--rk-bg);
 }
 
 .rk-button-primary {
-  @apply rk-button bg-rk-primary text-white hover:bg-rk-primary-600;
+  background-color: var(--rk-primary);
+  color: white;
+}
+
+.rk-button-primary:hover {
+  background-color: var(--rk-primary-600);
 }
 
 .rk-button-secondary {
-  @apply rk-button bg-rk-surface text-rk-text border border-rk-border hover:bg-rk-card;
+  background-color: var(--rk-surface);
+  color: var(--rk-text);
+  border: 1px solid var(--rk-border);
+}
+
+.rk-button-secondary:hover {
+  background-color: var(--rk-card);
 }
 
 .rk-button-ghost {
-  @apply rk-button text-rk-text hover:bg-rk-surface;
+  color: var(--rk-text);
+}
+
+.rk-button-ghost:hover {
+  background-color: var(--rk-surface);
 }
 
 /* Focus styles for accessibility */
 .rk-focus {
-  @apply focus:outline-none focus:ring-2 focus:ring-rk-primary focus:ring-offset-2 focus:ring-offset-rk-bg;
+  outline: none;
+}
+
+.rk-focus:focus {
+  outline: none;
+  ring: 2px solid var(--rk-primary);
+  ring-offset: 2px;
+  ring-offset-color: var(--rk-bg);
 }
 
 /* Reduced motion support */
