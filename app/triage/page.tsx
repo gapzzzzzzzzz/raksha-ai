@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { TriageResult } from '@/src/lib/triage/engine'
+import { TriageResult } from '@/lib/triage/engine'
 import { 
   Activity, 
   Thermometer, 
