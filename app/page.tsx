@@ -100,13 +100,13 @@ export default function Home() {
       <Hero />
 
       {/* Problem Section */}
-      <section className="py-24 bg-rk-surface">
+      <section className="py-20 bg-rk-surface">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-rk-text mb-6">
+            <h2 className="text-4xl md:text-5xl font-display font-bold text-rk-text mb-6">
               Masalah yang Kami Pecahkan
             </h2>
-            <p className="text-xl text-rk-subtle max-w-3xl mx-auto">
+            <p className="text-xl text-rk-subtle max-w-3xl mx-auto leading-relaxed">
               Akses layanan kesehatan yang terbatas, terutama di daerah terpencil, 
               membuat banyak orang kesulitan mendapatkan triage kesehatan yang cepat dan akurat.
             </p>
@@ -114,14 +114,14 @@ export default function Home() {
           
           <div className="grid md:grid-cols-3 gap-8">
             {problems.map((problem, index) => (
-              <div key={index} className="rk-card p-8 text-center group hover:border-rk-primary/50 transition-colors">
-                <div className="w-16 h-16 mx-auto mb-6 bg-rk-primary/10 rounded-2xl flex items-center justify-center group-hover:bg-rk-primary/20 transition-colors">
-                  <problem.icon className="w-8 h-8 text-rk-primary" />
+              <div key={index} className="rk-card-elevated p-8 text-center group hover:border-rk-primary/50 transition-all duration-200">
+                <div className="w-20 h-20 mx-auto mb-6 bg-rk-primary-50 rounded-2xl flex items-center justify-center group-hover:bg-rk-primary-50 transition-colors">
+                  <problem.icon className="w-10 h-10 text-rk-primary" />
                 </div>
-                <h3 className="text-xl font-display font-semibold text-rk-text mb-4">
+                <h3 className="text-2xl font-display font-semibold text-rk-text mb-4">
                   {problem.title}
                 </h3>
-                <p className="text-rk-subtle leading-relaxed">
+                <p className="text-rk-subtle leading-relaxed text-lg">
                   {problem.description}
                 </p>
               </div>
@@ -131,29 +131,29 @@ export default function Home() {
       </section>
 
       {/* Differentiators Section */}
-      <section className="py-24">
+      <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-rk-text mb-6">
+            <h2 className="text-4xl md:text-5xl font-display font-bold text-rk-text mb-6">
               Apa yang Membuat Raksha Beda?
             </h2>
-            <p className="text-xl text-rk-subtle max-w-3xl mx-auto">
+            <p className="text-xl text-rk-subtle max-w-3xl mx-auto leading-relaxed">
               Solusi inovatif yang menggabungkan teknologi AI dengan pemahaman mendalam tentang konteks kesehatan Indonesia.
             </p>
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {differentiators.map((item, index) => (
-              <div key={index} className="rk-card p-8 group hover:border-rk-primary/50 transition-colors">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-rk-surface rounded-xl flex items-center justify-center flex-shrink-0">
-                    <item.icon className={`w-6 h-6 ${item.color}`} />
+              <div key={index} className="rk-card-elevated p-8 group hover:border-rk-primary/50 transition-all duration-200">
+                <div className="flex items-start gap-6">
+                  <div className="w-16 h-16 bg-rk-primary-50 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:bg-rk-primary-50 transition-colors">
+                    <item.icon className={`w-8 h-8 ${item.color}`} />
                   </div>
                   <div>
-                    <h3 className="text-lg font-display font-semibold text-rk-text mb-2">
+                    <h3 className="text-xl font-display font-semibold text-rk-text mb-3">
                       {item.title}
                     </h3>
-                    <p className="text-rk-subtle text-sm leading-relaxed">
+                    <p className="text-rk-subtle leading-relaxed">
                       {item.description}
                     </p>
                   </div>
@@ -252,25 +252,25 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 bg-gradient-to-r from-rk-primary to-rk-accent">
+      <section className="py-20 bg-gradient-to-r from-rk-primary to-rk-primary-600">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-6">
+          <h2 className="text-4xl md:text-5xl font-display font-bold text-white mb-6">
             Siap Mencoba Raksha?
           </h2>
-          <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto leading-relaxed">
             Mulai triage kesehatan Anda sekarang dan dapatkan panduan yang tepat untuk kondisi Anda.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/triage"
-              className="bg-white text-rk-primary hover:bg-gray-100 px-8 py-4 rounded-2xl font-semibold transition-colors flex items-center justify-center gap-2"
+              className="bg-white text-rk-primary hover:bg-gray-50 px-8 py-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             >
               <Activity className="w-5 h-5" />
-              Mulai Triage
+              Mulai Triage Sekarang
             </Link>
             <Link
               href="/lite"
-              className="border-2 border-white text-white hover:bg-white hover:text-rk-primary px-8 py-4 rounded-2xl font-semibold transition-colors flex items-center justify-center gap-2"
+              className="border-2 border-white text-white hover:bg-white hover:text-rk-primary px-8 py-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2"
             >
               <Smartphone className="w-5 h-5" />
               Mode Lite

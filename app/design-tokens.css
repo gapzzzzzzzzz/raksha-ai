@@ -1,24 +1,38 @@
-/* Raksha Design Tokens */
+/* Raksha Design Tokens - Modern Clean Design */
 :root {
-  /* Brand Colors */
-  --rk-bg: #0B1220;
-  --rk-surface: #111827;
-  --rk-card: #0F172A;
-  --rk-border: #1F2937;
-  --rk-text: #E5E7EB;
-  --rk-subtle: #9CA3AF;
+  /* Light Theme Colors - High Contrast */
+  --rk-bg: #FFFFFF;
+  --rk-surface: #F8FAFC;
+  --rk-card: #FFFFFF;
+  --rk-border: #E2E8F0;
+  --rk-text: #1E293B;
+  --rk-subtle: #64748B;
   
-  --rk-primary: #0EA5E9;
-  --rk-primary-600: #0284C7;
-  --rk-accent: #22C55E;
-  --rk-warn: #F59E0B;
-  --rk-danger: #EF4444;
+  /* Brand Colors - Medical/Health Theme */
+  --rk-primary: #2563EB;
+  --rk-primary-600: #1D4ED8;
+  --rk-primary-50: #EFF6FF;
+  --rk-accent: #059669;
+  --rk-accent-50: #ECFDF5;
+  --rk-warn: #D97706;
+  --rk-warn-50: #FFFBEB;
+  --rk-danger: #DC2626;
+  --rk-danger-50: #FEF2F2;
+  
+  /* Semantic Colors */
+  --rk-success: #059669;
+  --rk-info: #0284C7;
+  --rk-emergency: #DC2626;
+  --rk-consult: #D97706;
+  --rk-self-care: #059669;
   
   /* Typography */
   --rk-font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
   --rk-font-body: 'Inter', system-ui, sans-serif;
   
   /* Spacing */
+  --rk-space-4: 1rem;
+  --rk-space-6: 1.5rem;
   --rk-space-8: 2rem;
   --rk-space-12: 3rem;
   --rk-space-16: 4rem;
@@ -26,55 +40,101 @@
   --rk-space-32: 8rem;
   
   /* Border Radius */
-  --rk-radius: 1rem;
+  --rk-radius-sm: 0.5rem;
+  --rk-radius: 0.75rem;
+  --rk-radius-lg: 1rem;
+  --rk-radius-xl: 1.5rem;
   
-  /* Shadows */
+  /* Shadows - Subtle and Modern */
+  --rk-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --rk-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
   --rk-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --rk-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --rk-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
-/* Utility Classes */
+/* Utility Classes - Modern and Clean */
 .rk-card {
   background-color: var(--rk-card);
   border: 1px solid var(--rk-border);
-  border-radius: 1rem;
-  box-shadow: var(--rk-shadow-md);
+  border-radius: var(--rk-radius-lg);
+  box-shadow: var(--rk-shadow);
+  padding: var(--rk-space-6);
+}
+
+.rk-card-elevated {
+  background-color: var(--rk-card);
+  border: 1px solid var(--rk-border);
+  border-radius: var(--rk-radius-lg);
+  box-shadow: var(--rk-shadow-lg);
+  padding: var(--rk-space-6);
 }
 
 .rk-chip {
   display: inline-flex;
   align-items: center;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
+  padding: 0.375rem 0.75rem;
+  border-radius: var(--rk-radius);
   font-size: 0.875rem;
   font-weight: 500;
+  background-color: var(--rk-surface);
+  color: var(--rk-text);
+  border: 1px solid var(--rk-border);
+}
+
+.rk-chip-primary {
+  background-color: var(--rk-primary-50);
+  color: var(--rk-primary);
+  border-color: var(--rk-primary);
+}
+
+.rk-chip-success {
+  background-color: var(--rk-accent-50);
+  color: var(--rk-accent);
+  border-color: var(--rk-accent);
+}
+
+.rk-chip-warning {
+  background-color: var(--rk-warn-50);
+  color: var(--rk-warn);
+  border-color: var(--rk-warn);
+}
+
+.rk-chip-danger {
+  background-color: var(--rk-danger-50);
+  color: var(--rk-danger);
+  border-color: var(--rk-danger);
 }
 
 .rk-badge {
   display: inline-flex;
   align-items: center;
-  padding: 0.125rem 0.625rem;
-  border-radius: 9999px;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--rk-radius-sm);
   font-size: 0.75rem;
-  font-weight: 500;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .rk-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.5rem 1rem;
-  border-radius: 1rem;
-  font-weight: 500;
-  transition: colors 0.2s;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--rk-radius);
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
   outline: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
 }
 
 .rk-button:focus {
   outline: none;
-  ring: 2px solid var(--rk-primary);
-  ring-offset: 2px;
-  ring-offset-color: var(--rk-bg);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .rk-button-primary {
@@ -84,6 +144,8 @@
 
 .rk-button-primary:hover {
   background-color: var(--rk-primary-600);
+  transform: translateY(-1px);
+  box-shadow: var(--rk-shadow-md);
 }
 
 .rk-button-secondary {
@@ -94,14 +156,31 @@
 
 .rk-button-secondary:hover {
   background-color: var(--rk-card);
+  border-color: var(--rk-primary);
+  transform: translateY(-1px);
+  box-shadow: var(--rk-shadow-md);
 }
 
 .rk-button-ghost {
   color: var(--rk-text);
+  background-color: transparent;
 }
 
 .rk-button-ghost:hover {
   background-color: var(--rk-surface);
+  transform: translateY(-1px);
+}
+
+.rk-button-lg {
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  border-radius: var(--rk-radius-lg);
+}
+
+.rk-button-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  border-radius: var(--rk-radius-sm);
 }
 
 /* Focus styles for accessibility */

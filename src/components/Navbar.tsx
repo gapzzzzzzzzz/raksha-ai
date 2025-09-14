@@ -16,16 +16,17 @@ export function Navbar() {
   ]
 
   return (
-    <nav className="sticky top-0 z-50 bg-rk-bg/95 backdrop-blur-sm border-b border-rk-border">
+    <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-rk-border shadow-sm">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 rk-focus">
+          <Link href="/" className="flex items-center gap-3 rk-focus">
             <div className="relative">
-              <HeartPulse className="w-8 h-8 text-rk-primary" />
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-rk-accent rounded-full animate-pulse-slow" />
+              <div className="w-10 h-10 bg-gradient-to-br from-rk-primary to-rk-primary-600 rounded-xl flex items-center justify-center">
+                <HeartPulse className="w-6 h-6 text-white" />
+              </div>
             </div>
-            <span className="text-xl font-display font-bold text-rk-text">
+            <span className="text-2xl font-display font-bold text-rk-text">
               Raksha
             </span>
           </Link>
@@ -36,7 +37,7 @@ export function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-rk-subtle hover:text-rk-text transition-colors rk-focus"
+                className="text-rk-subtle hover:text-rk-text transition-colors rk-focus font-medium"
               >
                 {item.label}
               </Link>
@@ -47,7 +48,7 @@ export function Navbar() {
           <div className="hidden md:flex items-center gap-4">
             <Link
               href="/triage"
-              className="rk-button-primary flex items-center gap-2"
+              className="rk-button rk-button-primary flex items-center gap-2"
             >
               <Activity className="w-4 h-4" />
               Mulai Triage
@@ -57,7 +58,7 @@ export function Navbar() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 rk-focus"
+            className="md:hidden p-2 rk-focus rounded-lg hover:bg-rk-surface transition-colors"
             aria-label="Toggle menu"
           >
             {isMenuOpen ? (
@@ -70,22 +71,22 @@ export function Navbar() {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-rk-border">
+          <div className="md:hidden border-t border-rk-border bg-white">
             <div className="py-4 space-y-2">
               {navItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="block px-4 py-2 text-rk-subtle hover:text-rk-text hover:bg-rk-surface rounded-lg transition-colors rk-focus"
+                  className="block px-4 py-3 text-rk-subtle hover:text-rk-text hover:bg-rk-surface rounded-lg transition-colors rk-focus font-medium"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.label}
                 </Link>
               ))}
-              <div className="px-4 pt-2">
+              <div className="px-4 pt-4">
                 <Link
                   href="/triage"
-                  className="rk-button-primary w-full flex items-center justify-center gap-2"
+                  className="rk-button rk-button-primary w-full flex items-center justify-center gap-2"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <Activity className="w-4 h-4" />

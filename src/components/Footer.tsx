@@ -18,24 +18,26 @@ export function Footer() {
 
   return (
     <footer className="bg-rk-surface border-t border-rk-border">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid md:grid-cols-3 gap-8">
+      <div className="container mx-auto px-4 py-16">
+        <div className="grid md:grid-cols-3 gap-12">
           {/* Brand Section */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <HeartPulse className="w-6 h-6 text-rk-primary" />
-              <span className="text-lg font-display font-bold text-rk-text">
+          <div className="space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-rk-primary to-rk-primary-600 rounded-xl flex items-center justify-center">
+                <HeartPulse className="w-6 h-6 text-white" />
+              </div>
+              <span className="text-2xl font-display font-bold text-rk-text">
                 Raksha
               </span>
             </div>
-            <p className="text-rk-subtle text-sm">
+            <p className="text-rk-subtle leading-relaxed">
               AI Health Triage 24/7 yang inklusif dan kontekstual untuk Indonesia.
             </p>
             <div className="flex flex-wrap gap-2">
               {features.map((feature) => (
                 <div
                   key={feature.label}
-                  className="rk-badge bg-rk-card text-rk-subtle flex items-center gap-1"
+                  className="rk-chip rk-chip-primary flex items-center gap-1"
                 >
                   <feature.icon className="w-3 h-3" />
                   {feature.label}
@@ -45,16 +47,16 @@ export function Footer() {
           </div>
 
           {/* Links Section */}
-          <div className="space-y-4">
-            <h3 className="font-display font-semibold text-rk-text">
+          <div className="space-y-6">
+            <h3 className="text-lg font-display font-semibold text-rk-text">
               Informasi
             </h3>
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               {footerLinks.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-rk-subtle hover:text-rk-text transition-colors text-sm rk-focus"
+                    className="text-rk-subtle hover:text-rk-text transition-colors rk-focus"
                   >
                     {link.label}
                   </Link>
@@ -64,11 +66,11 @@ export function Footer() {
           </div>
 
           {/* Disclaimer Section */}
-          <div className="space-y-4">
-            <h3 className="font-display font-semibold text-rk-text">
+          <div className="space-y-6">
+            <h3 className="text-lg font-display font-semibold text-rk-text">
               Penting
             </h3>
-            <div className="text-rk-subtle text-sm space-y-2">
+            <div className="text-rk-subtle space-y-3">
               <p>
                 Raksha bukan perangkat medis. Hasil triage hanya sebagai panduan awal.
               </p>
@@ -80,12 +82,12 @@ export function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-rk-border mt-8 pt-8">
+        <div className="border-t border-rk-border mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-rk-subtle text-sm">
+            <p className="text-rk-subtle">
               &copy; {currentYear} Raksha. Bukan perangkat medis. Konsultasikan dengan dokter untuk penanganan yang tepat.
             </p>
-            <div className="flex items-center gap-4 text-rk-subtle text-sm">
+            <div className="flex items-center gap-4 text-rk-subtle">
               <span>Made with ❤️ for Indonesia</span>
             </div>
           </div>
