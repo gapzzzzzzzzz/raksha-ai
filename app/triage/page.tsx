@@ -56,6 +56,28 @@ export default function TriagePage() {
   const [consent, setConsent] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Error boundary for component
+  if (error && !loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="rk-card-elevated p-8 max-w-md text-center">
+          <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-rk-text mb-2">Terjadi Kesalahan</h2>
+          <p className="text-rk-subtle mb-4">{error}</p>
+          <button
+            onClick={() => {
+              setError(null)
+              setResult(null)
+            }}
+            className="rk-button rk-button-primary"
+          >
+            Coba Lagi
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<TriageForm>({
     resolver: zodResolver(triageSchema)
   })
@@ -82,12 +104,20 @@ export default function TriagePage() {
       })
 
       if (!response.ok) {
-        throw new Error('Gagal melakukan triage')
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Gagal melakukan triage')
       }
 
-      const triageResult = await response.json()
-      setResult(triageResult)
+      const responseData = await response.json()
+      
+      // Validate response structure
+      if (!responseData.ok || !responseData.result) {
+        throw new Error('Format respons tidak valid')
+      }
+
+      setResult(responseData.result)
     } catch (err) {
+      console.error('Triage error:', err)
       setError(err instanceof Error ? err.message : 'Terjadi kesalahan')
     } finally {
       setLoading(false)
@@ -364,7 +394,7 @@ export default function TriagePage() {
                   )}
 
                   {/* Reasons */}
-                  {result.reasons.length > 0 && (
+                  {result.reasons && result.reasons.length > 0 && (
                     <div className="mb-6">
                       <h4 className="text-lg font-semibold text-rk-text mb-3">Alasan Penilaian</h4>
                       <ul className="space-y-2">
@@ -379,17 +409,61 @@ export default function TriagePage() {
                   )}
 
                   {/* Micro Education */}
-                  <div>
-                    <h4 className="text-lg font-semibold text-rk-text mb-3">Panduan Perawatan</h4>
-                    <ul className="space-y-2">
-                      {result.microEducation.map((education, index) => (
-                        <li key={index} className="flex items-start gap-3">
-                          <div className="w-2 h-2 bg-rk-primary rounded-full mt-2 flex-shrink-0" />
-                          <span className="text-rk-text">{education}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                  {result.microEducation && result.microEducation.length > 0 && (
+                    <div>
+                      <h4 className="text-lg font-semibold text-rk-text mb-3">Panduan Perawatan</h4>
+                      <ul className="space-y-2">
+                        {result.microEducation.map((education, index) => (
+                          <li key={index} className="flex items-start gap-3">
+                            <div className="w-2 h-2 bg-rk-primary rounded-full mt-2 flex-shrink-0" />
+                            <span className="text-rk-text">{education}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Top Conditions */}
+                  {result.topConditions && result.topConditions.length > 0 && (
+                    <div className="mb-6">
+                      <h4 className="text-lg font-semibold text-rk-text mb-3">Kondisi Terdeteksi</h4>
+                      <div className="space-y-2">
+                        {result.topConditions.map((condition, index) => (
+                          <div key={index} className="flex items-center justify-between p-3 bg-rk-surface rounded-lg">
+                            <div>
+                              <span className="font-medium text-rk-text">{condition.condition}</span>
+                              <p className="text-sm text-rk-subtle">{condition.why}</p>
+                            </div>
+                            <div className="text-sm text-rk-primary font-medium">
+                              {Math.round(condition.likelihood * 100)}%
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Matched Keywords */}
+                  {result.matchedKeywords && result.matchedKeywords.length > 0 && (
+                    <div className="mb-6">
+                      <h4 className="text-lg font-semibold text-rk-text mb-3">Kata Kunci Terdeteksi</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {result.matchedKeywords.map((keyword, index) => (
+                          <span key={index} className="rk-chip rk-chip-primary">
+                            {keyword}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Reasoning */}
+                  {result.reasoningLLM && (
+                    <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                      <h4 className="text-lg font-semibold text-rk-text mb-2">Penjelasan Sistem</h4>
+                      <p className="text-rk-subtle text-sm">{result.reasoningLLM}</p>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="rk-card-elevated p-8 text-center">
