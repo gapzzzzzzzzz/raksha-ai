@@ -119,7 +119,7 @@ export function isKeyboardNavigation(event: KeyboardEvent): boolean {
     KEYBOARD_KEYS.ARROW_RIGHT,
     KEYBOARD_KEYS.HOME,
     KEYBOARD_KEYS.END
-  ].includes(event.key as any)
+  ].includes(event.key as string)
 }
 
 // Focus management

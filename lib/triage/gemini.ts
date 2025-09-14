@@ -5,8 +5,7 @@ import {
   detectRedFlags, 
   extractKeywords, 
   getSeasonalContext, 
-  shouldApplySeasonalPrior,
-  SEASONAL_CONFIG 
+  shouldApplySeasonalPrior
 } from './ontology'
 
 // Configuration
@@ -141,7 +140,7 @@ function applySeasonalPrior(
     }
 
     // Boost DBD likelihood in differential
-    const updatedDifferential = geminiResponse.differential.map(condition => {
+    geminiResponse.differential = geminiResponse.differential.map(condition => {
       if (condition.condition === 'DBD/Dengue') {
         return {
           ...condition,
@@ -184,7 +183,7 @@ export async function triageHybrid(input: TriageInput): Promise<TriageResult> {
       new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Gemini request timeout')), 12000)
       )
-    ]) as any
+    ]) as { response: { text: () => string } }
 
     if (!result.response) {
       throw new Error('No response from Gemini')
@@ -204,7 +203,8 @@ export async function triageHybrid(input: TriageInput): Promise<TriageResult> {
 
     // Validate Gemini response
     try {
-      geminiResponse = require('./schema').validateGeminiResponse(geminiResponse)
+      const { validateGeminiResponse } = await import('./schema')
+      geminiResponse = validateGeminiResponse(geminiResponse)
     } catch (validationError) {
       throw new Error(`Invalid Gemini response format: ${validationError}`)
     }

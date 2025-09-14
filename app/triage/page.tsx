@@ -126,7 +126,7 @@ export default function TriagePage() {
 
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [])
+  }, [handleSubmit, onSubmit])
 
   return (
     <div className="min-h-screen bg-rk-bg">
@@ -356,7 +356,7 @@ export default function TriagePage() {
                       Hasil Triage Akan Muncul Di Sini
                     </h3>
                     <p className="text-rk-subtle mb-6">
-                      Isi form di sebelah kiri dan klik "Lakukan Triage" untuk melihat hasil
+                      Isi form di sebelah kiri dan klik &quot;Lakukan Triage&quot; untuk melihat hasil
                     </p>
                     <div className="text-sm text-rk-subtle">
                       <p className="mb-2">Tips:</p>

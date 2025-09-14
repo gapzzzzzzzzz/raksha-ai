@@ -16,7 +16,7 @@ export function registerServiceWorker() {
 
 export function installPWA() {
   if (typeof window !== 'undefined') {
-    let deferredPrompt: any
+    let deferredPrompt: Event | null = null
 
     window.addEventListener('beforeinstallprompt', (e) => {
       // Prevent the mini-infobar from appearing on mobile
@@ -41,8 +41,8 @@ export function installPWA() {
     return {
       install: () => {
         if (deferredPrompt) {
-          deferredPrompt.prompt()
-          deferredPrompt.userChoice.then((choiceResult: any) => {
+          ;(deferredPrompt as any).prompt()
+          ;(deferredPrompt as any).userChoice.then((choiceResult: { outcome: string }) => {
             if (choiceResult.outcome === 'accepted') {
               console.log('User accepted the install prompt')
             } else {

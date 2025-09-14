@@ -251,7 +251,6 @@ export function detectRedFlags(text: string): { [key: string]: boolean } {
 }
 
 export function extractKeywords(text: string): string[] {
-  const words = text.toLowerCase().split(/\s+/)
   const foundKeywords: string[] = []
   
   // Check for exact matches in aliases

@@ -61,7 +61,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
     let body: unknown
     try {
       body = await request.json()
-    } catch (error) {
+    } catch {
       return NextResponse.json(
         createErrorResponse('Invalid JSON in request body'),
         { status: 400 }
