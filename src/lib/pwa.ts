@@ -1,5 +1,11 @@
 'use client'
 
+// PWA Install Prompt types
+interface BeforeInstallPromptEvent extends Event {
+  prompt(): Promise<void>
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
+}
+
 export function registerServiceWorker() {
   if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
     window.addEventListener('load', () => {
@@ -16,13 +22,13 @@ export function registerServiceWorker() {
 
 export function installPWA() {
   if (typeof window !== 'undefined') {
-    let deferredPrompt: Event | null = null
+    let deferredPrompt: BeforeInstallPromptEvent | null = null
 
     window.addEventListener('beforeinstallprompt', (e) => {
       // Prevent the mini-infobar from appearing on mobile
       e.preventDefault()
       // Stash the event so it can be triggered later
-      deferredPrompt = e
+      deferredPrompt = e as BeforeInstallPromptEvent
       // Show install button or notification
       showInstallPrompt()
     })
@@ -41,8 +47,8 @@ export function installPWA() {
     return {
       install: () => {
         if (deferredPrompt) {
-          ;(deferredPrompt as any).prompt()
-          ;(deferredPrompt as any).userChoice.then((choiceResult: { outcome: string }) => {
+          deferredPrompt.prompt()
+          deferredPrompt.userChoice.then((choiceResult) => {
             if (choiceResult.outcome === 'accepted') {
               console.log('User accepted the install prompt')
             } else {

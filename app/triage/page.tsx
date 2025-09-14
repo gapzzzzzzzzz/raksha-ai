@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -65,7 +65,7 @@ export default function TriagePage() {
     setToasts(prev => prev.filter(toast => toast.id !== id))
   }
 
-  const onSubmit = async (data: TriageForm) => {
+  const onSubmit = useCallback(async (data: TriageForm) => {
     setLoading(true)
     
     try {
@@ -107,7 +107,7 @@ export default function TriagePage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [currentMonth, consent, addToast])
 
   const addSymptomSuggestion = (symptom: string) => {
     const current = symptomsText || ''
