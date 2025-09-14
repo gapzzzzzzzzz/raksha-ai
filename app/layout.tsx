@@ -63,8 +63,11 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased bg-rk-bg text-rk-text">
         <PWAProvider>
+          <a href="#main-content" className="skip-link">
+            Skip to main content
+          </a>
           <Navbar />
-          <main className="min-h-screen">
+          <main id="main-content" className="min-h-screen">
             {children}
           </main>
           <Footer />

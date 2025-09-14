@@ -21,6 +21,7 @@ import {
   Clock,
   User
 } from 'lucide-react'
+import { announceToScreenReader } from '@/lib/accessibility'
 
 const triageSchema = z.object({
   symptomsText: z.string().min(1, 'Gejala harus diisi'),
@@ -86,6 +87,11 @@ export default function TriagePage() {
 
       const triageResult = await response.json()
       setResult(triageResult)
+      
+      // Announce result to screen readers
+      announceToScreenReader(
+        `Triage berhasil. Tingkat risiko: ${triageResult.level}. Skor: ${triageResult.score} dari 100.`
+      )
       
       addToast({
         type: 'success',
@@ -294,7 +300,7 @@ export default function TriagePage() {
                 {loading ? (
                   <SkeletonCard />
                 ) : result ? (
-                  <div className="space-y-6">
+                  <div className="space-y-6" role="region" aria-live="polite" aria-label="Hasil Triage">
                     <RiskCard
                       level={result.level}
                       score={result.score}

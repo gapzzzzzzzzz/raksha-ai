@@ -1,5 +1,6 @@
 import { AlertTriangle, Clock, HeartPulse, MapPin, ExternalLink, Info } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { getAriaLabel, generateId } from '@/lib/accessibility'
 
 export interface RiskCardProps {
   level: 'EMERGENCY' | 'CONSULT' | 'SELF_CARE'
@@ -50,6 +51,10 @@ export function RiskCard({
 }: RiskCardProps) {
   const config = riskConfig[level]
   const Icon = config.icon
+  const cardId = generateId('risk-card')
+  const scoreId = generateId('risk-score')
+  const reasonsId = generateId('risk-reasons')
+  const educationId = generateId('risk-education')
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return 'text-rk-danger'
@@ -63,10 +68,16 @@ export function RiskCard({
   }
 
   return (
-    <div className={cn(
-      "rk-card p-6 space-y-6",
-      config.borderColor
-    )}>
+    <div 
+      id={cardId}
+      className={cn(
+        "rk-card p-6 space-y-6",
+        config.borderColor
+      )}
+      role="region"
+      aria-labelledby={`${cardId}-title`}
+      aria-describedby={`${scoreId} ${reasonsId} ${educationId}`}
+    >
       {/* Header */}
       <div className="text-center">
         <div className={cn(
@@ -75,15 +86,25 @@ export function RiskCard({
         )}>
           <Icon className={cn("w-10 h-10", config.color)} />
         </div>
-        <h3 className={cn("text-2xl font-display font-bold mb-2", config.color)}>
+        <h3 
+          id={`${cardId}-title`}
+          className={cn("text-2xl font-display font-bold mb-2", config.color)}
+        >
           {config.label}
         </h3>
         <p className="text-rk-subtle mb-4">{config.description}</p>
         
         {/* Score */}
-        <div className="flex items-center justify-center gap-2">
+        <div 
+          id={scoreId}
+          className="flex items-center justify-center gap-2"
+          aria-label={getAriaLabel(level, score)}
+        >
           <span className="text-sm text-rk-subtle">Skor:</span>
-          <span className={cn("text-3xl font-bold", getScoreColor(score))}>
+          <span 
+            className={cn("text-3xl font-bold", getScoreColor(score))}
+            aria-label={`Skor ${score} dari 100`}
+          >
             {score}
           </span>
           <span className="text-sm text-rk-subtle">/100</span>
@@ -106,33 +127,39 @@ export function RiskCard({
       )}
 
       {/* Reasons */}
-      <div>
+      <div id={reasonsId}>
         <h4 className="font-semibold text-rk-text mb-3 flex items-center gap-2">
           <span>Mengapa level ini?</span>
         </h4>
-        <div className="space-y-2">
+        <ul className="space-y-2" role="list">
           {reasons.map((reason, index) => (
-            <div key={index} className="flex items-start gap-2">
-              <div className="w-1.5 h-1.5 bg-rk-primary rounded-full mt-2 flex-shrink-0" />
+            <li key={index} className="flex items-start gap-2">
+              <div 
+                className="w-1.5 h-1.5 bg-rk-primary rounded-full mt-2 flex-shrink-0" 
+                aria-hidden="true"
+              />
               <span className="text-rk-subtle text-sm">{reason}</span>
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
 
       {/* Micro Education */}
-      <div>
+      <div id={educationId}>
         <h4 className="font-semibold text-rk-text mb-3">
           Langkah Aman Saat Ini
         </h4>
-        <div className="space-y-2">
+        <ul className="space-y-2" role="list">
           {microEducation.map((item, index) => (
-            <div key={index} className="flex items-start gap-2">
-              <div className="w-1.5 h-1.5 bg-rk-accent rounded-full mt-2 flex-shrink-0" />
+            <li key={index} className="flex items-start gap-2">
+              <div 
+                className="w-1.5 h-1.5 bg-rk-accent rounded-full mt-2 flex-shrink-0" 
+                aria-hidden="true"
+              />
               <span className="text-rk-subtle text-sm">{item}</span>
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
 
       {/* Action Button */}
@@ -142,10 +169,11 @@ export function RiskCard({
           target="_blank"
           rel="noopener noreferrer"
           className="rk-button-primary w-full flex items-center justify-center gap-2"
+          aria-label={`Buka Google Maps untuk mencari fasilitas kesehatan terdekat${region ? ` di ${region}` : ''}`}
         >
-          <MapPin className="w-4 h-4" />
+          <MapPin className="w-4 h-4" aria-hidden="true" />
           Buka Maps Fasilitas Terdekat
-          <ExternalLink className="w-4 h-4" />
+          <ExternalLink className="w-4 h-4" aria-hidden="true" />
         </a>
       </div>
 
