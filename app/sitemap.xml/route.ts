@@ -38,7 +38,7 @@ export async function GET(): Promise<Response> {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${sitemap.map(item => `  <url>
     <loc>${item.url}</loc>
-    <lastmod>${item.lastModified?.toISOString()}</lastmod>
+    <lastmod>${item.lastModified instanceof Date ? item.lastModified.toISOString() : item.lastModified}</lastmod>
     <changefreq>${item.changeFrequency}</changefreq>
     <priority>${item.priority}</priority>
   </url>`).join('\n')}
