@@ -156,11 +156,11 @@ function applySeasonalPrior(
       level: newLevel,
       score: newScore,
       reasons: newReasons,
-      seasonalContext
+      seasonalContext: seasonalContext || undefined
     }
   }
 
-  return { level, score, reasons, seasonalContext }
+  return { level, score, reasons, seasonalContext: seasonalContext || undefined }
 }
 
 // Main hybrid triage function
