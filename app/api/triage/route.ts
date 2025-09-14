@@ -8,6 +8,7 @@ import {
   type ApiResponse 
 } from '../../../lib/triage/schema'
 import { triageHybridWithRetry } from '../../../lib/triage/gemini'
+import { simpleTriage } from '../../../lib/triage/simple-engine'
 
 // Rate limiting (simple in-memory store for demo)
 const requestCounts = new Map<string, { count: number; resetTime: number }>()
@@ -115,15 +116,31 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
       )
     }
 
-    // Call the hybrid triage engine
+    // Call the triage engine with fallback
     try {
-      const result = await triageHybridWithRetry(triageInput, 1)
+      let result
+      
+      // Try Gemini API first if available
+      if (process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+        try {
+          result = await triageHybridWithRetry(triageInput, 1)
+          console.log('Triage completed with Gemini AI')
+        } catch (geminiError) {
+          console.warn('Gemini API failed, falling back to simple engine:', geminiError)
+          result = simpleTriage(triageInput)
+          console.log('Triage completed with simple engine (fallback)')
+        }
+      } else {
+        // Use simple engine if no API key
+        result = simpleTriage(triageInput)
+        console.log('Triage completed with simple engine (no API key)')
+      }
       
       // Log successful triage (without PII)
       console.log('Triage completed successfully', {
         level: result.level,
         score: result.score,
-        conditionsCount: result.topConditions.length,
+        conditionsCount: result.topConditions?.length || 0,
         timestamp: new Date().toISOString()
       })
       
@@ -132,27 +149,18 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
     } catch (error) {
       console.error('Triage engine error:', error)
       
-      // Handle specific error types
-      if (error instanceof Error) {
-        if (error.message === 'model_unavailable') {
-          return NextResponse.json(
-            createErrorResponse('Triage service temporarily unavailable. Please try again later.'),
-            { status: 503 }
-          )
-        }
-        
-        if (error.message.includes('timeout')) {
-          return NextResponse.json(
-            createErrorResponse('Request timeout. Please try again.'),
-            { status: 504 }
-          )
-        }
+      // Final fallback to simple engine
+      try {
+        const fallbackResult = simpleTriage(triageInput)
+        console.log('Triage completed with simple engine (final fallback)')
+        return NextResponse.json(createSuccessResponse(fallbackResult))
+      } catch (fallbackError) {
+        console.error('Even simple engine failed:', fallbackError)
+        return NextResponse.json(
+          createErrorResponse('Triage service temporarily unavailable. Please try again later.'),
+          { status: 503 }
+        )
       }
-      
-      return NextResponse.json(
-        createErrorResponse('Internal server error. Please try again later.'),
-        { status: 500 }
-      )
     }
 
   } catch (error) {
