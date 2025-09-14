@@ -99,22 +99,24 @@ export default function LitePage() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-gray-900">
+    <div className="min-h-screen bg-white text-rk-text">
       {/* Minimal Header */}
-      <header className="bg-sky-500 text-white p-3">
+      <header className="bg-rk-primary text-white p-4 shadow-sm">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <HeartPulse className="w-5 h-5" />
-            <h1 className="text-lg font-bold">Raksha Lite</h1>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+              <HeartPulse className="w-5 h-5" />
+            </div>
+            <h1 className="text-xl font-bold">Raksha Lite</h1>
           </div>
           <div className="flex items-center gap-2 text-sm">
             {isOffline ? (
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 bg-white/20 px-2 py-1 rounded-lg">
                 <Wifi className="w-4 h-4" />
                 <span>Offline</span>
               </div>
             ) : (
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 bg-white/20 px-2 py-1 rounded-lg">
                 <Smartphone className="w-4 h-4" />
                 <span>Lite</span>
               </div>
@@ -131,8 +133,8 @@ export default function LitePage() {
         </div>
 
         {/* Form */}
-        <div className="bg-gray-50 p-4 rounded-lg mb-4">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div className="rk-card p-6 mb-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Symptoms */}
             <div>
               <label className="block text-sm font-medium mb-1">Gejala *</label>
@@ -216,7 +218,7 @@ export default function LitePage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-sky-500 hover:bg-sky-600 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded text-sm"
+              className="w-full rk-button rk-button-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Memproses...' : 'Triage'}
             </button>
@@ -231,7 +233,7 @@ export default function LitePage() {
 
         {/* Results */}
         {result && (
-          <div className="bg-gray-50 p-4 rounded-lg mb-4">
+          <div className="rk-card p-6 mb-6">
             <h3 className="font-bold mb-3 text-sm">Hasil Triage</h3>
             
             {/* Risk Level */}
