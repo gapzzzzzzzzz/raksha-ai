@@ -1,12 +1,13 @@
 {
-  "name": "Raksha AI - Health Triage",
-  "short_name": "Raksha AI",
-  "description": "AI Health Triage 24/7 untuk Indonesia",
+  "name": "Raksha - AI Health Triage 24/7",
+  "short_name": "Raksha",
+  "description": "Triage kesehatan berbasis AI yang inklusif dan kontekstual untuk Indonesia",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0B1220",
   "theme_color": "#0EA5E9",
   "orientation": "portrait-primary",
+  "scope": "/",
   "icons": [
     {
       "src": "/icon-192.png",
@@ -23,5 +24,45 @@
   ],
   "categories": ["health", "medical", "utilities"],
   "lang": "id",
-  "dir": "ltr"
+  "dir": "ltr",
+  "screenshots": [
+    {
+      "src": "/screenshot-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/screenshot-narrow.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Triage",
+      "short_name": "Triage",
+      "description": "Mulai triage kesehatan",
+      "url": "/triage",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Lite Mode",
+      "short_name": "Lite",
+      "description": "Mode ringan untuk koneksi lambat",
+      "url": "/lite",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
 }

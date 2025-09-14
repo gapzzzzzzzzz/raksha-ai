@@ -3,6 +3,7 @@ import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { PWAProvider } from "@/components/PWAProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -61,11 +62,13 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Raksha" />
       </head>
       <body className="font-sans antialiased bg-rk-bg text-rk-text">
-        <Navbar />
-        <main className="min-h-screen">
-          {children}
-        </main>
-        <Footer />
+        <PWAProvider>
+          <Navbar />
+          <main className="min-h-screen">
+            {children}
+          </main>
+          <Footer />
+        </PWAProvider>
       </body>
     </html>
   );

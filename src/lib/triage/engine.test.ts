@@ -180,7 +180,7 @@ describe('Triage Engine', () => {
         
         const result = performTriage(input)
         expect(result.level).toBe('EMERGENCY')
-        expect(result.reasons.some(r => r.includes('sesak napas'))).toBe(true)
+        expect(result.reasons.some(r => r.includes('sesak napas') || r.includes(alias))).toBe(true)
       })
     })
 

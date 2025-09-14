@@ -24,7 +24,7 @@ export type TriageResult = {
 const SYMPTOM_KEYWORDS = {
   // Emergency symptoms
   emergency: {
-    'sesak napas': ['sesak', 'napas pendek', 'sulit bernapas', 'terengah-engah', 'susah nafas', 'napas berat', 'sesak nafas'],
+    'sesak napas': ['sesak', 'napas pendek', 'sulit bernapas', 'terengah-engah', 'terengah engah', 'susah nafas', 'napas berat', 'sesak nafas'],
     'pendarahan': ['berdarah', 'mimisan', 'darah', 'perdarahan', 'pendarahan hebat', 'mimisan hebat'],
     'nyeri dada': ['sakit dada', 'dada sakit', 'nyeri di dada', 'dada terasa sakit'],
     'pingsan': ['tidak sadar', 'hilang kesadaran', 'pingsan', 'collapsed'],
