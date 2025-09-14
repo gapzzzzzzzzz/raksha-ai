@@ -74,7 +74,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
       triageInput = validateTriageInput(body)
     } catch (error) {
       if (error instanceof z.ZodError) {
-        const errorMessages = error.errors.map(err => 
+        const errorMessages = error.issues.map(err => 
           `${err.path.join('.')}: ${err.message}`
         ).join(', ')
         return NextResponse.json(

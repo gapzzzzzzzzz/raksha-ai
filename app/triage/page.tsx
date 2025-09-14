@@ -56,14 +56,14 @@ export default function TriagePage() {
   const currentMonth = new Date().getMonth() + 1
   const symptomsText = watch('symptomsText')
 
-  const addToast = (toast: Omit<ToastProps, 'id' | 'onClose'>) => {
+  const removeToast = useCallback((id: string) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id))
+  }, [])
+
+  const addToast = useCallback((toast: Omit<ToastProps, 'id' | 'onClose'>) => {
     const id = Math.random().toString(36).substr(2, 9)
     setToasts(prev => [...prev, { ...toast, id, onClose: removeToast }])
-  }
-
-  const removeToast = (id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id))
-  }
+  }, [removeToast])
 
   const onSubmit = useCallback(async (data: TriageForm) => {
     setLoading(true)
