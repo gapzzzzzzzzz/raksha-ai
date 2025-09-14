@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -400,7 +400,7 @@ export default function TriagePage() {
                     Hasil Triage Akan Muncul Di Sini
                   </h3>
                   <p className="text-rk-subtle">
-                    Isi form di sebelah kiri dan klik "Mulai Triage" untuk mendapatkan hasil
+                    Isi form di sebelah kiri dan klik &quot;Mulai Triage&quot; untuk mendapatkan hasil
                   </p>
                 </div>
               )}
