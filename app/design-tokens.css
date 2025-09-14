@@ -1,0 +1,77 @@
+/* Raksha Design Tokens */
+:root {
+  /* Brand Colors */
+  --rk-bg: #0B1220;
+  --rk-surface: #111827;
+  --rk-card: #0F172A;
+  --rk-border: #1F2937;
+  --rk-text: #E5E7EB;
+  --rk-subtle: #9CA3AF;
+  
+  --rk-primary: #0EA5E9;
+  --rk-primary-600: #0284C7;
+  --rk-accent: #22C55E;
+  --rk-warn: #F59E0B;
+  --rk-danger: #EF4444;
+  
+  /* Typography */
+  --rk-font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  --rk-font-body: 'Inter', system-ui, sans-serif;
+  
+  /* Spacing */
+  --rk-space-8: 2rem;
+  --rk-space-12: 3rem;
+  --rk-space-16: 4rem;
+  --rk-space-24: 6rem;
+  --rk-space-32: 8rem;
+  
+  /* Border Radius */
+  --rk-radius: 1rem;
+  
+  /* Shadows */
+  --rk-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --rk-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Utility Classes */
+.rk-card {
+  @apply bg-rk-card border border-rk-border rounded-2xl shadow-md;
+}
+
+.rk-chip {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
+}
+
+.rk-badge {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.rk-button {
+  @apply inline-flex items-center justify-center px-4 py-2 rounded-2xl font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-rk-primary focus:ring-offset-2 focus:ring-offset-rk-bg;
+}
+
+.rk-button-primary {
+  @apply rk-button bg-rk-primary text-white hover:bg-rk-primary-600;
+}
+
+.rk-button-secondary {
+  @apply rk-button bg-rk-surface text-rk-text border border-rk-border hover:bg-rk-card;
+}
+
+.rk-button-ghost {
+  @apply rk-button text-rk-text hover:bg-rk-surface;
+}
+
+/* Focus styles for accessibility */
+.rk-focus {
+  @apply focus:outline-none focus:ring-2 focus:ring-rk-primary focus:ring-offset-2 focus:ring-offset-rk-bg;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
