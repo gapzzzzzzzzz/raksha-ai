@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { triageHybrid } from '@/lib/triage/gemini'
-import { validateTriageInput, type TriageInput } from '@/lib/triage/schema'
-import { detectRedFlags, extractKeywords, shouldApplySeasonalPrior } from '@/lib/triage/ontology'
+import { triageHybrid } from '../lib/triage/gemini'
+import { validateTriageInput, type TriageInput } from '../lib/triage/schema'
+import { detectRedFlags, extractKeywords, shouldApplySeasonalPrior } from '../lib/triage/ontology'
 
 // Mock the Google Generative AI
 vi.mock('@google/generative-ai', () => ({

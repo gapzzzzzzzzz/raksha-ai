@@ -6,8 +6,8 @@ import {
   createSuccessResponse,
   type TriageInput,
   type ApiResponse 
-} from '@/lib/triage/schema'
-import { triageHybridWithRetry } from '@/lib/triage/gemini'
+} from '../../../lib/triage/schema'
+import { triageHybridWithRetry } from '../../../lib/triage/gemini'
 
 // Rate limiting (simple in-memory store for demo)
 const requestCounts = new Map<string, { count: number; resetTime: number }>()

@@ -225,7 +225,7 @@ export async function triageHybrid(input: TriageInput): Promise<TriageResult> {
     const matchedKeywords = extractKeywords(input.symptomsText)
 
     // Build final result
-    const result: TriageResult = {
+    const triageResult: TriageResult = {
       level: finalLevel,
       score: Math.min(finalScore, 100),
       reasons: finalReasons,
@@ -237,7 +237,7 @@ export async function triageHybrid(input: TriageInput): Promise<TriageResult> {
       extracted: geminiResponse // For debugging
     }
 
-    return result
+    return triageResult
 
   } catch (error) {
     console.error('Triage engine error:', error)
