@@ -1,63 +1,187 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { performTriage, TriageInput } from '@/lib/triage/engine'
-import { PrismaClient } from '@prisma/client'
+import { 
+  validateTriageInput, 
+  createErrorResponse, 
+  createSuccessResponse,
+  type TriageInput,
+  type ApiResponse 
+} from '@/lib/triage/schema'
+import { triageHybridWithRetry } from '@/lib/triage/gemini'
 
-const prisma = new PrismaClient()
+// Rate limiting (simple in-memory store for demo)
+const requestCounts = new Map<string, { count: number; resetTime: number }>()
+const RATE_LIMIT_WINDOW = 60 * 1000 // 1 minute
+const RATE_LIMIT_MAX_REQUESTS = 10 // 10 requests per minute per IP
 
-const triageSchema = z.object({
-  symptomsText: z.string().min(1, 'Gejala harus diisi'),
-  age: z.number().min(0).max(120).optional(),
-  tempC: z.number().min(30).max(45).optional(),
-  daysFever: z.number().min(0).max(30).optional(),
-  region: z.string().optional(),
-  month: z.number().min(1).max(12).optional(),
-  redFlags: z.object({
-    chestPain: z.boolean().optional(),
-    bleeding: z.boolean().optional(),
-    sob: z.boolean().optional()
-  }).optional(),
-  consent: z.boolean().optional()
-})
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now()
+  const userRequests = requestCounts.get(ip)
+  
+  if (!userRequests || now > userRequests.resetTime) {
+    requestCounts.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW })
+    return true
+  }
+  
+  if (userRequests.count >= RATE_LIMIT_MAX_REQUESTS) {
+    return false
+  }
+  
+  userRequests.count++
+  return true
+}
 
-export async function POST(request: NextRequest) {
+function getClientIP(request: NextRequest): string {
+  const forwarded = request.headers.get('x-forwarded-for')
+  const realIP = request.headers.get('x-real-ip')
+  
+  if (forwarded) {
+    return forwarded.split(',')[0].trim()
+  }
+  
+  if (realIP) {
+    return realIP
+  }
+  
+  return 'unknown'
+}
+
+export async function POST(request: NextRequest): Promise<NextResponse<ApiResponse>> {
   try {
-    const body = await request.json()
-    const validatedData = triageSchema.parse(body)
-    
-    // Perform triage
-    const result = performTriage(validatedData as TriageInput)
-    
-    // Store anonymized report if consent given
-    if (validatedData.consent) {
-      try {
-        await prisma.report.create({
-          data: {
-            region: validatedData.region || null,
-            month: validatedData.month || null,
-            riskLevel: result.level,
-            reasons: result.reasons
-          }
-        })
-      } catch (dbError) {
-        console.error('Failed to store report:', dbError)
-        // Don't fail the request if DB storage fails
-      }
-    }
-    
-    return NextResponse.json(result)
-  } catch (error) {
-    if (error instanceof z.ZodError) {
+    // Rate limiting
+    const clientIP = getClientIP(request)
+    if (!checkRateLimit(clientIP)) {
       return NextResponse.json(
-        { error: 'Invalid input data', details: error.issues },
+        createErrorResponse('Rate limit exceeded. Please try again later.'),
+        { status: 429 }
+      )
+    }
+
+    // Parse and validate request body
+    let body: unknown
+    try {
+      body = await request.json()
+    } catch (error) {
+      return NextResponse.json(
+        createErrorResponse('Invalid JSON in request body'),
         { status: 400 }
       )
     }
-    
-    console.error('Triage error:', error)
+
+    // Validate input schema
+    let triageInput: TriageInput
+    try {
+      triageInput = validateTriageInput(body)
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errorMessages = error.errors.map(err => 
+          `${err.path.join('.')}: ${err.message}`
+        ).join(', ')
+        return NextResponse.json(
+          createErrorResponse(`Validation error: ${errorMessages}`),
+          { status: 400 }
+        )
+      }
+      return NextResponse.json(
+        createErrorResponse('Invalid input format'),
+        { status: 400 }
+      )
+    }
+
+    // Check for empty or suspicious input
+    if (!triageInput.symptomsText.trim()) {
+      return NextResponse.json(
+        createErrorResponse('Symptoms text cannot be empty'),
+        { status: 400 }
+      )
+    }
+
+    // Check for potential abuse (very short or very repetitive text)
+    const symptomsText = triageInput.symptomsText.trim()
+    if (symptomsText.length < 3) {
+      return NextResponse.json(
+        createErrorResponse('Symptoms text too short'),
+        { status: 400 }
+      )
+    }
+
+    // Check for repetitive text (potential spam)
+    const words = symptomsText.split(/\s+/)
+    const uniqueWords = new Set(words.map(w => w.toLowerCase()))
+    if (words.length > 10 && uniqueWords.size < words.length * 0.3) {
+      return NextResponse.json(
+        createErrorResponse('Suspicious input detected'),
+        { status: 400 }
+      )
+    }
+
+    // Call the hybrid triage engine
+    try {
+      const result = await triageHybridWithRetry(triageInput, 1)
+      
+      // Log successful triage (without PII)
+      console.log('Triage completed successfully', {
+        level: result.level,
+        score: result.score,
+        conditionsCount: result.topConditions.length,
+        timestamp: new Date().toISOString()
+      })
+      
+      return NextResponse.json(createSuccessResponse(result))
+      
+    } catch (error) {
+      console.error('Triage engine error:', error)
+      
+      // Handle specific error types
+      if (error instanceof Error) {
+        if (error.message === 'model_unavailable') {
+          return NextResponse.json(
+            createErrorResponse('Triage service temporarily unavailable. Please try again later.'),
+            { status: 503 }
+          )
+        }
+        
+        if (error.message.includes('timeout')) {
+          return NextResponse.json(
+            createErrorResponse('Request timeout. Please try again.'),
+            { status: 504 }
+          )
+        }
+      }
+      
+      return NextResponse.json(
+        createErrorResponse('Internal server error. Please try again later.'),
+        { status: 500 }
+      )
+    }
+
+  } catch (error) {
+    console.error('Unexpected error in triage API:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      createErrorResponse('Unexpected error occurred'),
       { status: 500 }
     )
   }
+}
+
+// Handle unsupported methods
+export async function GET(): Promise<NextResponse<ApiResponse>> {
+  return NextResponse.json(
+    createErrorResponse('Method not allowed. Use POST.'),
+    { status: 405 }
+  )
+}
+
+export async function PUT(): Promise<NextResponse<ApiResponse>> {
+  return NextResponse.json(
+    createErrorResponse('Method not allowed. Use POST.'),
+    { status: 405 }
+  )
+}
+
+export async function DELETE(): Promise<NextResponse<ApiResponse>> {
+  return NextResponse.json(
+    createErrorResponse('Method not allowed. Use POST.'),
+    { status: 405 }
+  )
 }
