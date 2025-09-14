@@ -1,15 +1,26 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { RiskCard } from '@/components/RiskCard'
 import { ConsentSwitch } from '@/components/ConsentSwitch'
+import { FormField, TextareaField, SelectField } from '@/components/FormField'
+import { SkeletonCard } from '@/components/Skeleton'
+import { ToastContainer, ToastProps } from '@/components/Toast'
 import { TriageResult } from '@/lib/triage/engine'
 import { INDONESIAN_PROVINCES } from '@/lib/utils/regions'
-import { HeartPulse, MapPin, ExternalLink } from 'lucide-react'
-import Link from 'next/link'
+import { 
+  Activity, 
+  Thermometer, 
+  Calendar, 
+  MapPin, 
+  AlertTriangle,
+  HeartPulse,
+  Clock,
+  User
+} from 'lucide-react'
 
 const triageSchema = z.object({
   symptomsText: z.string().min(1, 'Gejala harus diisi'),
@@ -27,21 +38,34 @@ const triageSchema = z.object({
 
 type TriageForm = z.infer<typeof triageSchema>
 
+const symptomSuggestions = [
+  'demam', 'ruam', 'mual', 'pusing', 'lemas', 'batuk', 'sesak', 'nyeri', 'muntah'
+]
+
 export default function TriagePage() {
   const [result, setResult] = useState<TriageResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [consent, setConsent] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [toasts, setToasts] = useState<ToastProps[]>([])
 
-  const { register, handleSubmit, formState: { errors }, watch } = useForm<TriageForm>({
+  const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm<TriageForm>({
     resolver: zodResolver(triageSchema)
   })
 
   const currentMonth = new Date().getMonth() + 1
+  const symptomsText = watch('symptomsText')
+
+  const addToast = (toast: Omit<ToastProps, 'id' | 'onClose'>) => {
+    const id = Math.random().toString(36).substr(2, 9)
+    setToasts(prev => [...prev, { ...toast, id, onClose: removeToast }])
+  }
+
+  const removeToast = (id: string) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id))
+  }
 
   const onSubmit = async (data: TriageForm) => {
     setLoading(true)
-    setError(null)
     
     try {
       const response = await fetch('/api/triage', {
@@ -62,211 +86,284 @@ export default function TriagePage() {
 
       const triageResult = await response.json()
       setResult(triageResult)
+      
+      addToast({
+        type: 'success',
+        title: 'Triage Berhasil',
+        description: 'Hasil triage telah dihasilkan'
+      })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Terjadi kesalahan')
+      addToast({
+        type: 'error',
+        title: 'Gagal Triage',
+        description: err instanceof Error ? err.message : 'Terjadi kesalahan'
+      })
     } finally {
       setLoading(false)
     }
   }
 
-  const findNearestFacility = () => {
-    const region = watch('region')
-    if (region) {
-      const query = encodeURIComponent(`rumah sakit terdekat ${region}`)
-      window.open(`https://www.google.com/maps/search/${query}`, '_blank')
-    } else {
-      window.open('https://www.google.com/maps/search/rumah+sakit+terdekat', '_blank')
-    }
+  const addSymptomSuggestion = (symptom: string) => {
+    const current = symptomsText || ''
+    const newText = current ? `${current}, ${symptom}` : symptom
+    setValue('symptomsText', newText)
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      {/* Navigation */}
-      <nav className="container mx-auto px-4 py-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <HeartPulse className="w-8 h-8 text-sky-500" />
-            <span className="text-2xl font-bold text-white">Raksha AI</span>
-          </div>
-          <div className="flex gap-4">
-            <Link href="/" className="text-gray-300 hover:text-white transition-colors">
-              Home
-            </Link>
-            <a href="/lite" className="text-gray-300 hover:text-white transition-colors">
-              Lite
-            </a>
-          </div>
-        </div>
-      </nav>
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === 'Enter') {
+        e.preventDefault()
+        handleSubmit(onSubmit)()
+      }
+    }
 
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
+  return (
+    <div className="min-h-screen bg-rk-bg">
+      <ToastContainer toasts={toasts} onClose={removeToast} />
+      
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-white mb-4">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-5xl font-display font-bold text-rk-text mb-4">
               AI Health Triage
             </h1>
-            <p className="text-gray-300">
-              Jelaskan gejala Anda untuk mendapatkan panduan triage yang akurat
+            <p className="text-xl text-rk-subtle max-w-2xl mx-auto">
+              Jelaskan gejala Anda untuk mendapatkan panduan triage yang akurat dan kontekstual
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-8">
-            {/* Form */}
-            <div className="bg-gray-900 p-6 rounded-2xl">
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                {/* Symptoms */}
-                <div>
-                  <label className="block text-white font-medium mb-2">
-                    Gejala yang Dialami *
-                  </label>
-                  <textarea
+          <div className="grid lg:grid-cols-12 gap-8">
+            {/* Form Panel - 7 columns */}
+            <div className="lg:col-span-7">
+              <div className="rk-card p-8">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                  {/* Symptoms */}
+                  <TextareaField
+                    label="Gejala yang Dialami"
+                    placeholder="Contoh: demam tinggi 39°C selama 2 hari, mual, ruam merah, lemas"
+                    error={errors.symptomsText?.message}
+                    help="Jelaskan gejala secara detail termasuk durasi dan tingkat keparahan"
+                    icon={<Activity className="w-5 h-5" />}
                     {...register('symptomsText')}
-                    className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                    placeholder="Contoh: Demam tinggi, sakit kepala, mual, lemas..."
                     rows={4}
                   />
-                  {errors.symptomsText && (
-                    <p className="text-red-400 text-sm mt-1">{errors.symptomsText.message}</p>
-                  )}
-                </div>
 
-                {/* Age */}
-                <div>
-                  <label className="block text-white font-medium mb-2">
-                    Usia (tahun)
-                  </label>
-                  <input
-                    type="number"
-                    {...register('age', { valueAsNumber: true })}
-                    className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                    placeholder="Contoh: 25"
-                  />
-                </div>
+                  {/* Symptom Suggestions */}
+                  <div>
+                    <label className="block text-sm font-medium text-rk-text mb-2">
+                      Klik untuk menambah gejala umum:
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {symptomSuggestions.map((symptom) => (
+                        <button
+                          key={symptom}
+                          type="button"
+                          onClick={() => addSymptomSuggestion(symptom)}
+                          className="rk-chip bg-rk-surface text-rk-text hover:bg-rk-primary/10 hover:text-rk-primary transition-colors cursor-pointer"
+                        >
+                          {symptom}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
-                {/* Temperature */}
-                <div>
-                  <label className="block text-white font-medium mb-2">
-                    Suhu Tubuh (°C)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    {...register('tempC', { valueAsNumber: true })}
-                    className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                    placeholder="Contoh: 38.5"
-                  />
-                </div>
+                  {/* Age and Temperature Row */}
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <FormField
+                      label="Usia (tahun)"
+                      type="number"
+                      placeholder="Contoh: 25"
+                      icon={<User className="w-5 h-5" />}
+                      {...register('age', { valueAsNumber: true })}
+                    />
+                    <FormField
+                      label="Suhu Tubuh (°C)"
+                      type="number"
+                      step="0.1"
+                      placeholder="Contoh: 38.5"
+                      icon={<Thermometer className="w-5 h-5" />}
+                      {...register('tempC', { valueAsNumber: true })}
+                    />
+                  </div>
 
-                {/* Days of Fever */}
-                <div>
-                  <label className="block text-white font-medium mb-2">
-                    Berapa hari demam?
-                  </label>
-                  <input
+                  {/* Days of Fever */}
+                  <FormField
+                    label="Berapa hari demam?"
                     type="number"
-                    {...register('daysFever', { valueAsNumber: true })}
-                    className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
                     placeholder="Contoh: 2"
+                    icon={<Calendar className="w-5 h-5" />}
+                    help="Hitung dari hari pertama demam"
+                    {...register('daysFever', { valueAsNumber: true })}
                   />
-                </div>
 
-                {/* Region */}
-                <div>
-                  <label className="block text-white font-medium mb-2">
-                    Wilayah/Provinsi
-                  </label>
-                  <select
+                  {/* Region */}
+                  <SelectField
+                    label="Wilayah/Provinsi"
+                    options={INDONESIAN_PROVINCES.map(province => ({
+                      value: province,
+                      label: province
+                    }))}
+                    icon={<MapPin className="w-5 h-5" />}
+                    help="Pilih untuk mendapatkan konteks musiman yang akurat"
                     {...register('region')}
-                    className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  />
+
+                  {/* Red Flags */}
+                  <div>
+                    <label className="block text-sm font-medium text-rk-text mb-3">
+                      Gejala Darurat (centang jika ada)
+                    </label>
+                    <div className="rk-card p-4 space-y-3">
+                      <label className="flex items-center gap-3 cursor-pointer group">
+                        <input
+                          type="checkbox"
+                          {...register('redFlags.chestPain')}
+                          className="w-4 h-4 text-rk-danger bg-rk-surface border-rk-border rounded focus:ring-rk-danger focus:ring-2"
+                        />
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle className="w-4 h-4 text-rk-danger" />
+                          <span className="text-rk-text group-hover:text-rk-primary transition-colors">
+                            Nyeri dada
+                          </span>
+                        </div>
+                      </label>
+                      <label className="flex items-center gap-3 cursor-pointer group">
+                        <input
+                          type="checkbox"
+                          {...register('redFlags.bleeding')}
+                          className="w-4 h-4 text-rk-danger bg-rk-surface border-rk-border rounded focus:ring-rk-danger focus:ring-2"
+                        />
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle className="w-4 h-4 text-rk-danger" />
+                          <span className="text-rk-text group-hover:text-rk-primary transition-colors">
+                            Pendarahan
+                          </span>
+                        </div>
+                      </label>
+                      <label className="flex items-center gap-3 cursor-pointer group">
+                        <input
+                          type="checkbox"
+                          {...register('redFlags.sob')}
+                          className="w-4 h-4 text-rk-danger bg-rk-surface border-rk-border rounded focus:ring-rk-danger focus:ring-2"
+                        />
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle className="w-4 h-4 text-rk-danger" />
+                          <span className="text-rk-text group-hover:text-rk-primary transition-colors">
+                            Sesak napas
+                          </span>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Consent */}
+                  <ConsentSwitch checked={consent} onChange={setConsent} />
+
+                  {/* Submit Button */}
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="rk-button-primary w-full py-4 text-lg font-semibold group disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <option value="">Pilih wilayah...</option>
-                    {INDONESIAN_PROVINCES.map(province => (
-                      <option key={province} value={province}>
-                        {province}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Red Flags */}
-                <div>
-                  <label className="block text-white font-medium mb-2">
-                    Gejala Darurat (centang jika ada)
-                  </label>
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-gray-300">
-                      <input
-                        type="checkbox"
-                        {...register('redFlags.chestPain')}
-                        className="rounded border-gray-600 bg-gray-800 text-sky-500 focus:ring-sky-500"
-                      />
-                      Nyeri dada
-                    </label>
-                    <label className="flex items-center gap-2 text-gray-300">
-                      <input
-                        type="checkbox"
-                        {...register('redFlags.bleeding')}
-                        className="rounded border-gray-600 bg-gray-800 text-sky-500 focus:ring-sky-500"
-                      />
-                      Pendarahan
-                    </label>
-                    <label className="flex items-center gap-2 text-gray-300">
-                      <input
-                        type="checkbox"
-                        {...register('redFlags.sob')}
-                        className="rounded border-gray-600 bg-gray-800 text-sky-500 focus:ring-sky-500"
-                      />
-                      Sesak napas
-                    </label>
-                  </div>
-                </div>
-
-                {/* Consent */}
-                <ConsentSwitch checked={consent} onChange={setConsent} />
-
-                {/* Submit */}
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-sky-500 hover:bg-sky-600 disabled:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
-                >
-                  {loading ? 'Memproses...' : 'Lakukan Triage'}
-                </button>
-
-                {error && (
-                  <div className="p-3 bg-red-900/50 border border-red-500 rounded-lg text-red-200">
-                    {error}
-                  </div>
-                )}
-              </form>
+                    {loading ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Memproses Triage...
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center gap-2">
+                        <HeartPulse className="w-5 h-5 group-hover:animate-pulse" />
+                        Lakukan Triage
+                        <span className="text-sm opacity-75">(Ctrl+Enter)</span>
+                      </div>
+                    )}
+                  </button>
+                </form>
+              </div>
             </div>
 
-            {/* Results */}
-            <div>
-              {result ? (
-                <div className="space-y-6">
-                  <RiskCard result={result} />
-                  
-                  <button
-                    onClick={findNearestFacility}
-                    className="w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
-                  >
-                    <MapPin className="w-5 h-5" />
-                    Cari Fasilitas Kesehatan Terdekat
-                    <ExternalLink className="w-4 h-4" />
-                  </button>
-                </div>
-              ) : (
-                <div className="bg-gray-900 p-6 rounded-2xl text-center">
-                  <HeartPulse className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-white mb-2">
-                    Hasil Triage Akan Muncul Di Sini
-                  </h3>
-                  <p className="text-gray-400">
-                    Isi form di sebelah kiri dan klik &quot;Lakukan Triage&quot; untuk melihat hasil
-                  </p>
-                </div>
-              )}
+            {/* Result Panel - 5 columns */}
+            <div className="lg:col-span-5">
+              <div className="sticky top-8">
+                {loading ? (
+                  <SkeletonCard />
+                ) : result ? (
+                  <div className="space-y-6">
+                    <RiskCard
+                      level={result.level}
+                      score={result.score}
+                      reasons={result.reasons}
+                      microEducation={result.microEducation}
+                      seasonalContext={result.seasonalContext}
+                      region={watch('region')}
+                    />
+                    
+                    {/* Additional Actions */}
+                    <div className="rk-card p-6">
+                      <h3 className="font-semibold text-rk-text mb-4 flex items-center gap-2">
+                        <Clock className="w-5 h-5 text-rk-primary" />
+                        Langkah Selanjutnya
+                      </h3>
+                      <div className="space-y-3">
+                        <button
+                          onClick={() => {
+                            const region = watch('region')
+                            const query = region 
+                              ? `rumah sakit terdekat ${region}`
+                              : 'rumah sakit terdekat'
+                            window.open(`https://maps.google.com/maps?q=${encodeURIComponent(query)}`, '_blank')
+                          }}
+                          className="rk-button-secondary w-full flex items-center justify-center gap-2"
+                        >
+                          <MapPin className="w-4 h-4" />
+                          Cari Fasilitas Kesehatan Terdekat
+                        </button>
+                        
+                        <button
+                          onClick={() => {
+                            setResult(null)
+                            addToast({
+                              type: 'info',
+                              title: 'Form Direset',
+                              description: 'Silakan isi form baru untuk triage berikutnya'
+                            })
+                          }}
+                          className="rk-button-ghost w-full"
+                        >
+                          Triage Baru
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rk-card p-8 text-center">
+                    <div className="w-20 h-20 mx-auto mb-6 bg-rk-primary/10 rounded-2xl flex items-center justify-center">
+                      <HeartPulse className="w-10 h-10 text-rk-primary animate-pulse-slow" />
+                    </div>
+                    <h3 className="text-xl font-display font-semibold text-rk-text mb-3">
+                      Hasil Triage Akan Muncul Di Sini
+                    </h3>
+                    <p className="text-rk-subtle mb-6">
+                      Isi form di sebelah kiri dan klik "Lakukan Triage" untuk melihat hasil
+                    </p>
+                    <div className="text-sm text-rk-subtle">
+                      <p className="mb-2">Tips:</p>
+                      <ul className="space-y-1 text-left">
+                        <li>• Jelaskan gejala secara detail</li>
+                        <li>• Sertakan suhu tubuh jika ada demam</li>
+                        <li>• Pilih wilayah untuk konteks musiman</li>
+                        <li>• Gunakan Ctrl+Enter untuk submit cepat</li>
+                      </ul>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
