@@ -5,7 +5,6 @@ import {
   Clock, 
   HeartPulse, 
   Activity, 
-  Smartphone, 
   Wifi, 
   MessageSquare,
   ArrowRight,

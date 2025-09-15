@@ -10,22 +10,32 @@ import {
 
 // Configuration
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-1.5-pro'
-const API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY
 
-if (!API_KEY) {
-  throw new Error('GOOGLE_GENERATIVE_AI_API_KEY environment variable is required')
-}
+// Initialize Gemini (lazy initialization)
+let genAI: GoogleGenerativeAI | null = null
+let model: GenerativeModel | null = null
 
-// Initialize Gemini
-const genAI = new GoogleGenerativeAI(API_KEY)
-const model: GenerativeModel = genAI.getGenerativeModel({ 
-  model: GEMINI_MODEL,
-  generationConfig: {
-    temperature: 0.1, // Low temperature for consistent outputs
-    maxOutputTokens: 1000,
-    responseMimeType: 'application/json'
+function initializeGemini(): { genAI: GoogleGenerativeAI; model: GenerativeModel } {
+  const API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY
+  
+  if (!API_KEY) {
+    throw new Error('GOOGLE_GENERATIVE_AI_API_KEY environment variable is required')
   }
-})
+
+  if (!genAI || !model) {
+    genAI = new GoogleGenerativeAI(API_KEY)
+    model = genAI.getGenerativeModel({ 
+      model: GEMINI_MODEL,
+      generationConfig: {
+        temperature: 0.1, // Low temperature for consistent outputs
+        maxOutputTokens: 1000,
+        responseMimeType: 'application/json'
+      }
+    })
+  }
+
+  return { genAI, model }
+}
 
 // Micro-education content per level
 const MICRO_EDUCATION = {
@@ -166,6 +176,9 @@ function applySeasonalPrior(
 // Main hybrid triage function
 export async function triageHybrid(input: TriageInput): Promise<TriageResult> {
   try {
+    // Initialize Gemini (this will throw if API key is missing)
+    const { model: geminiModel } = initializeGemini()
+
     // Build the prompt
     const userPrompt = buildUserPrompt(input.symptomsText, {
       age: input.age,
@@ -179,7 +192,7 @@ export async function triageHybrid(input: TriageInput): Promise<TriageResult> {
 
     // Call Gemini with timeout
     const result = await Promise.race([
-      model.generateContent([SYSTEM_PROMPT, userPrompt]),
+      geminiModel.generateContent([SYSTEM_PROMPT, userPrompt]),
       new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Gemini request timeout')), 12000)
       )

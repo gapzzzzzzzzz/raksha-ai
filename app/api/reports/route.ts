@@ -155,7 +155,7 @@ export async function GET(request: NextRequest) {
   } finally {
     try {
       await prisma.$disconnect()
-    } catch (error) {
+    } catch {
       // Ignore disconnect errors
     }
   }

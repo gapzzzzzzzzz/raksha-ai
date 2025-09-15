@@ -106,7 +106,7 @@ export default function DashboardPage() {
               <div className="w-16 h-16 bg-rk-primary rounded-2xl flex items-center justify-center mx-auto mb-6">
                 <HeartPulse className="w-8 h-8 text-white" />
               </div>
-              <SectionHeading>Loading Dashboard...</SectionHeading>
+              <SectionHeading title="Loading Dashboard..." />
               <p className="text-rk-subtle">Fetching health data and analytics</p>
             </div>
             

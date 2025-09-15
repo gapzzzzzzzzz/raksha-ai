@@ -8,7 +8,7 @@ export async function GET() {
       // This would be a real DB check in production
       // For now, we'll simulate it
       dbStatus = 'connected'
-    } catch (error) {
+    } catch {
       dbStatus = 'fallback'
     }
 
@@ -18,7 +18,7 @@ export async function GET() {
       db: dbStatus,
       version: '1.0.0'
     })
-  } catch (error) {
+  } catch {
     return NextResponse.json({
       ok: false,
       error: 'Health check failed',
