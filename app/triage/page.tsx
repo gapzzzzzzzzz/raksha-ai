@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { TriageResult } from '@/lib/triage/engine'
+import { TriageResult } from '../../lib/triage/schema'
 import { 
   Activity, 
   Thermometer, 
@@ -55,28 +55,6 @@ export default function TriagePage() {
   const [loading, setLoading] = useState(false)
   const [consent, setConsent] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  // Error boundary for component
-  if (error && !loading) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="rk-card-elevated p-8 max-w-md text-center">
-          <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-rk-text mb-2">Terjadi Kesalahan</h2>
-          <p className="text-rk-subtle mb-4">{error}</p>
-          <button
-            onClick={() => {
-              setError(null)
-              setResult(null)
-            }}
-            className="rk-button rk-button-primary"
-          >
-            Coba Lagi
-          </button>
-        </div>
-      </div>
-    )
-  }
 
   const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<TriageForm>({
     resolver: zodResolver(triageSchema)
@@ -155,6 +133,28 @@ export default function TriagePage() {
       case 'SELF_CARE': return <HeartPulse className="w-6 h-6" />
       default: return <Info className="w-6 h-6" />
     }
+  }
+
+  // Show error state if there's an error and not loading
+  if (error && !loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="rk-card-elevated p-8 max-w-md text-center">
+          <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-rk-text mb-2">Terjadi Kesalahan</h2>
+          <p className="text-rk-subtle mb-4">{error}</p>
+          <button
+            onClick={() => {
+              setError(null)
+              setResult(null)
+            }}
+            className="rk-button rk-button-primary"
+          >
+            Coba Lagi
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -398,7 +398,7 @@ export default function TriagePage() {
                     <div className="mb-6">
                       <h4 className="text-lg font-semibold text-rk-text mb-3">Alasan Penilaian</h4>
                       <ul className="space-y-2">
-                        {result.reasons.map((reason, index) => (
+                        {result.reasons.map((reason: string, index: number) => (
                           <li key={index} className="flex items-start gap-3">
                             <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
                             <span className="text-rk-text">{reason}</span>
@@ -413,7 +413,7 @@ export default function TriagePage() {
                     <div>
                       <h4 className="text-lg font-semibold text-rk-text mb-3">Panduan Perawatan</h4>
                       <ul className="space-y-2">
-                        {result.microEducation.map((education, index) => (
+                        {result.microEducation.map((education: string, index: number) => (
                           <li key={index} className="flex items-start gap-3">
                             <div className="w-2 h-2 bg-rk-primary rounded-full mt-2 flex-shrink-0" />
                             <span className="text-rk-text">{education}</span>
@@ -428,7 +428,7 @@ export default function TriagePage() {
                     <div className="mb-6">
                       <h4 className="text-lg font-semibold text-rk-text mb-3">Kondisi Terdeteksi</h4>
                       <div className="space-y-2">
-                        {result.topConditions.map((condition, index) => (
+                        {result.topConditions.map((condition: {condition: string, likelihood: number, why: string}, index: number) => (
                           <div key={index} className="flex items-center justify-between p-3 bg-rk-surface rounded-lg">
                             <div>
                               <span className="font-medium text-rk-text">{condition.condition}</span>
@@ -448,7 +448,7 @@ export default function TriagePage() {
                     <div className="mb-6">
                       <h4 className="text-lg font-semibold text-rk-text mb-3">Kata Kunci Terdeteksi</h4>
                       <div className="flex flex-wrap gap-2">
-                        {result.matchedKeywords.map((keyword, index) => (
+                        {result.matchedKeywords.map((keyword: string, index: number) => (
                           <span key={index} className="rk-chip rk-chip-primary">
                             {keyword}
                           </span>
