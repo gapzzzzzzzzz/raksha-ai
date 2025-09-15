@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
-import { PWAProvider } from "@/components/PWAProvider";
+import { Navbar } from "@/src/components/Navbar";
+import { Footer } from "@/src/components/Footer";
+import { PWAProvider } from "@/src/components/PWAProvider";
 
 const inter = Inter({
   subsets: ["latin"],

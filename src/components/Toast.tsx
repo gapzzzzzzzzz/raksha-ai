@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { CheckCircle, AlertCircle, X } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/src/lib/utils'
 
 export interface ToastProps {
   id: string

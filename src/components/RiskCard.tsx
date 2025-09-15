@@ -1,6 +1,6 @@
 import { AlertTriangle, Clock, HeartPulse, MapPin, ExternalLink, Info } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { getAriaLabel, generateId } from '@/lib/accessibility'
+import { cn } from '@/src/lib/utils'
+import { getAriaLabel, generateId } from '@/src/lib/accessibility'
 
 export interface RiskCardProps {
   level: 'EMERGENCY' | 'CONSULT' | 'SELF_CARE'

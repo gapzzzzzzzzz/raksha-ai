@@ -1,5 +1,7 @@
 @import './design-tokens.css';
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   --background: var(--rk-bg);

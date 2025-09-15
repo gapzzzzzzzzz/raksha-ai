@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { performTriage, TriageInput } from '@/lib/triage/engine'
+import { performTriage, TriageInput } from '@/src/lib/triage/engine'
 
 const botSchema = z.object({
   phone: z.string().min(1, 'Nomor telepon harus diisi'),

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { TriageResult } from '../../lib/triage/schema'
+import { TriageResult, TriageInput, ApiResponse } from '../../lib/triage/schema'
 import { 
   Activity, 
   Thermometer, 
@@ -171,12 +171,11 @@ export default function TriagePage() {
               <HeartPulse className="w-4 h-4" />
               AI Health Triage
             </div>
-            <SectionHeading as="h1" className="text-4xl md:text-5xl">
-              Triage Kesehatan
-            </SectionHeading>
-            <p className="text-xl text-rk-subtle max-w-3xl mx-auto leading-relaxed mt-6">
-              Jelaskan gejala Anda untuk mendapatkan panduan triage yang akurat dan kontekstual untuk Indonesia
-            </p>
+            <SectionHeading 
+              title="Triage Kesehatan"
+              subtitle="Jelaskan gejala Anda untuk mendapatkan panduan triage yang akurat dan kontekstual untuk Indonesia"
+              className="text-4xl md:text-5xl"
+            />
           </div>
 
           {/* 12-Column Grid Layout */}

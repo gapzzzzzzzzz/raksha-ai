@@ -1,33 +1,29 @@
-import { ReactNode } from 'react'
-import { cn } from '@/lib/utils'
+import React from 'react'
+import { cn } from '@/src/lib/utils'
 
 interface SectionHeadingProps {
-  children: ReactNode
+  title: string
+  subtitle?: string
   className?: string
-  as?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
+  align?: 'left' | 'center' | 'right'
 }
 
-export function SectionHeading({ 
-  children, 
-  className, 
-  as: Component = 'h2' 
-}: SectionHeadingProps) {
+export function SectionHeading({ title, subtitle, className, align = 'center' }: SectionHeadingProps) {
   return (
-    <Component className={cn('rk-section-heading', className)}>
-      {children}
-    </Component>
-  )
-}
-
-interface SectionSubheadingProps {
-  children: ReactNode
-  className?: string
-}
-
-export function SectionSubheading({ children, className }: SectionSubheadingProps) {
-  return (
-    <p className={cn('rk-section-subheading', className)}>
-      {children}
-    </p>
+    <div className={cn(
+      'space-y-4',
+      align === 'center' && 'text-center',
+      align === 'right' && 'text-right',
+      className
+    )}>
+      <h2 className="text-3xl md:text-4xl font-display font-bold text-rk-text">
+        {title}
+      </h2>
+      {subtitle && (
+        <p className="text-xl text-rk-subtle max-w-3xl mx-auto leading-relaxed">
+          {subtitle}
+        </p>
+      )}
+    </div>
   )
 }

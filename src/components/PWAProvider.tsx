@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { registerServiceWorker, installPWA } from '@/lib/pwa'
+import { registerServiceWorker, installPWA } from '@/src/lib/pwa'
 
 interface PWAProviderProps {
   children: React.ReactNode

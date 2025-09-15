@@ -1,6 +1,6 @@
 import { forwardRef } from 'react'
-import { cn } from '@/lib/utils'
-import { generateId } from '@/lib/accessibility'
+import { cn } from '@/src/lib/utils'
+import { generateId } from '@/src/lib/accessibility'
 
 interface FormFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string
