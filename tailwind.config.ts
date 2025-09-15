@@ -10,28 +10,28 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Brand colors - Light theme with high contrast
+        // Brand colors - Dark theme
         rk: {
-          bg: "#FFFFFF",        // white
-          surface: "#F8FAFC",   // slate-50
-          card: "#FFFFFF",      // white
-          border: "#E2E8F0",    // slate-200
-          text: "#1E293B",      // slate-800
-          subtle: "#64748B",    // slate-500
-          primary: "#2563EB",   // blue-600
-          "primary-600": "#1D4ED8", // blue-700
-          "primary-50": "#EFF6FF",  // blue-50
-          accent: "#059669",    // emerald-600
-          "accent-50": "#ECFDF5",   // emerald-50
-          warn: "#D97706",      // amber-600
-          "warn-50": "#FFFBEB",     // amber-50
-          danger: "#DC2626",    // red-600
-          "danger-50": "#FEF2F2",   // red-50
-          success: "#059669",   // emerald-600
-          info: "#0284C7",      // sky-600
-          emergency: "#DC2626", // red-600
-          consult: "#D97706",   // amber-600
-          "self-care": "#059669", // emerald-600
+          bg: "#0B1220",        // dark blue
+          surface: "#111827",   // gray-900
+          card: "#0F172A",      // slate-900
+          border: "#1F2937",    // gray-800
+          text: "#E5E7EB",      // gray-200
+          subtle: "#9CA3AF",    // gray-400
+          primary: "#0EA5E9",   // sky-500
+          "primary-600": "#0284C7", // sky-600
+          "primary-50": "#0C4A6E",  // sky-900
+          accent: "#22C55E",    // green-500
+          "accent-50": "#14532D",   // green-900
+          warning: "#F59E0B",   // amber-500
+          "warning-50": "#451A03",  // amber-900
+          danger: "#EF4444",    // red-500
+          "danger-50": "#450A0A",   // red-900
+          success: "#22C55E",   // green-500
+          info: "#0EA5E9",      // sky-500
+          emergency: "#EF4444", // red-500
+          consult: "#F59E0B",   // amber-500
+          "self-care": "#22C55E", // green-500
         },
       },
       fontFamily: {

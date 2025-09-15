@@ -16,7 +16,7 @@ export function Navbar() {
   ]
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-rk-border shadow-sm">
+    <nav className="sticky top-0 z-50 bg-rk-bg/95 backdrop-blur-sm border-b border-rk-border shadow-sm">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
@@ -37,7 +37,7 @@ export function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-rk-subtle hover:text-rk-text transition-colors rk-focus font-medium"
+                className="text-rk-subtle hover:text-rk-primary transition-colors rk-focus font-medium"
               >
                 {item.label}
               </Link>
@@ -51,7 +51,7 @@ export function Navbar() {
               className="rk-button rk-button-primary flex items-center gap-2"
             >
               <Activity className="w-4 h-4" />
-              Mulai Triage
+              Start Triage
             </Link>
           </div>
 
@@ -71,13 +71,13 @@ export function Navbar() {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-rk-border bg-white">
+          <div className="md:hidden border-t border-rk-border bg-rk-bg">
             <div className="py-4 space-y-2">
               {navItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="block px-4 py-3 text-rk-subtle hover:text-rk-text hover:bg-rk-surface rounded-lg transition-colors rk-focus font-medium"
+                  className="block px-4 py-3 text-rk-subtle hover:text-rk-primary hover:bg-rk-surface rounded-lg transition-colors rk-focus font-medium"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.label}
@@ -90,7 +90,7 @@ export function Navbar() {
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <Activity className="w-4 h-4" />
-                  Mulai Triage
+                  Start Triage
                 </Link>
               </div>
             </div>

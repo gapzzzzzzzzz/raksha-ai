@@ -1,30 +1,30 @@
-/* Raksha Design Tokens - Modern Clean Design */
+/* Raksha Design Tokens - Dark Theme Production Design */
 :root {
-  /* Light Theme Colors - High Contrast */
-  --rk-bg: #FFFFFF;
-  --rk-surface: #F8FAFC;
-  --rk-card: #FFFFFF;
-  --rk-border: #E2E8F0;
-  --rk-text: #1E293B;
-  --rk-subtle: #64748B;
+  /* Dark Theme Colors */
+  --rk-bg: #0B1220;
+  --rk-surface: #111827;
+  --rk-card: #0F172A;
+  --rk-border: #1F2937;
+  --rk-text: #E5E7EB;
+  --rk-subtle: #9CA3AF;
   
-  /* Brand Colors - Medical/Health Theme */
-  --rk-primary: #2563EB;
-  --rk-primary-600: #1D4ED8;
-  --rk-primary-50: #EFF6FF;
-  --rk-accent: #059669;
-  --rk-accent-50: #ECFDF5;
-  --rk-warn: #D97706;
-  --rk-warn-50: #FFFBEB;
-  --rk-danger: #DC2626;
-  --rk-danger-50: #FEF2F2;
+  /* Brand Colors */
+  --rk-primary: #0EA5E9;
+  --rk-primary-600: #0284C7;
+  --rk-primary-50: #0C4A6E;
+  --rk-accent: #22C55E;
+  --rk-accent-50: #14532D;
+  --rk-warning: #F59E0B;
+  --rk-warning-50: #451A03;
+  --rk-danger: #EF4444;
+  --rk-danger-50: #450A0A;
   
   /* Semantic Colors */
-  --rk-success: #059669;
-  --rk-info: #0284C7;
-  --rk-emergency: #DC2626;
-  --rk-consult: #D97706;
-  --rk-self-care: #059669;
+  --rk-success: #22C55E;
+  --rk-info: #0EA5E9;
+  --rk-emergency: #EF4444;
+  --rk-consult: #F59E0B;
+  --rk-self-care: #22C55E;
   
   /* Typography */
   --rk-font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
@@ -44,28 +44,36 @@
   --rk-radius: 0.75rem;
   --rk-radius-lg: 1rem;
   --rk-radius-xl: 1.5rem;
+  --rk-radius-2xl: 2rem;
   
-  /* Shadows - Subtle and Modern */
-  --rk-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --rk-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  --rk-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --rk-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --rk-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  /* Shadows */
+  --rk-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --rk-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  --rk-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --rk-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+  --rk-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
 }
 
-/* Utility Classes - Modern and Clean */
+/* Base Styles */
+body {
+  background-color: var(--rk-bg);
+  color: var(--rk-text);
+  font-family: var(--rk-font-body);
+}
+
+/* Utility Classes */
 .rk-card {
   background-color: var(--rk-card);
   border: 1px solid var(--rk-border);
-  border-radius: var(--rk-radius-lg);
-  box-shadow: var(--rk-shadow);
+  border-radius: var(--rk-radius-2xl);
+  box-shadow: var(--rk-shadow-md);
   padding: var(--rk-space-6);
 }
 
 .rk-card-elevated {
   background-color: var(--rk-card);
   border: 1px solid var(--rk-border);
-  border-radius: var(--rk-radius-lg);
+  border-radius: var(--rk-radius-2xl);
   box-shadow: var(--rk-shadow-lg);
   padding: var(--rk-space-6);
 }
@@ -95,9 +103,9 @@
 }
 
 .rk-chip-warning {
-  background-color: var(--rk-warn-50);
-  color: var(--rk-warn);
-  border-color: var(--rk-warn);
+  background-color: var(--rk-warning-50);
+  color: var(--rk-warning);
+  border-color: var(--rk-warning);
 }
 
 .rk-chip-danger {
@@ -134,7 +142,7 @@
 
 .rk-button:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 2px var(--rk-primary);
 }
 
 .rk-button-primary {
@@ -183,6 +191,35 @@
   border-radius: var(--rk-radius-sm);
 }
 
+/* Section Heading */
+.rk-section-heading {
+  font-family: var(--rk-font-display);
+  font-weight: 700;
+  font-size: 2.75rem;
+  line-height: 1.25;
+  color: var(--rk-text);
+  margin-bottom: var(--rk-space-6);
+}
+
+.rk-section-subheading {
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: var(--rk-subtle);
+  margin-bottom: var(--rk-space-8);
+}
+
+/* Skeleton Loading */
+.rk-skeleton {
+  background: linear-gradient(90deg, var(--rk-surface) 25%, var(--rk-border) 50%, var(--rk-surface) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
 /* Focus styles for accessibility */
 .rk-focus {
   outline: none;
@@ -190,9 +227,7 @@
 
 .rk-focus:focus {
   outline: none;
-  ring: 2px solid var(--rk-primary);
-  ring-offset: 2px;
-  ring-offset-color: var(--rk-bg);
+  box-shadow: 0 0 0 2px var(--rk-primary);
 }
 
 /* Reduced motion support */

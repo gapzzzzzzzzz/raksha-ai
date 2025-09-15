@@ -1,44 +1,29 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { TriageResult } from '@/lib/triage/engine'
-import { HeartPulse, Wifi, Smartphone } from 'lucide-react'
+import { HeartPulse, ArrowRight, AlertTriangle, Clock, CheckCircle } from 'lucide-react'
+import { RKButton } from '@/src/components/RKButton'
 
-const triageSchema = z.object({
-  symptomsText: z.string().min(1, 'Gejala harus diisi'),
-  age: z.number().min(0).max(120).optional(),
-  tempC: z.number().min(30).max(45).optional(),
-  daysFever: z.number().min(0).max(30).optional(),
-  region: z.string().optional(),
-  redFlags: z.object({
-    chestPain: z.boolean().optional(),
-    bleeding: z.boolean().optional(),
-    sob: z.boolean().optional()
-  }).optional()
-})
-
-type TriageForm = z.infer<typeof triageSchema>
+interface TriageResult {
+  level: 'EMERGENCY' | 'CONSULT' | 'SELF_CARE'
+  score: number
+  reasons: string[]
+  microEducation: string[]
+}
 
 export default function LitePage() {
-  const [result, setResult] = useState<TriageResult | null>(null)
+  const [symptoms, setSymptoms] = useState('')
+  const [age, setAge] = useState('')
   const [loading, setLoading] = useState(false)
+  const [result, setResult] = useState<TriageResult | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [isOffline, setIsOffline] = useState(false)
+  const [isOnline, setIsOnline] = useState(true)
 
-  const { register, handleSubmit, formState: { errors } } = useForm<TriageForm>({
-    resolver: zodResolver(triageSchema)
-  })
-
-  // Check online status
   useEffect(() => {
-    // Only run on client side
     if (typeof window !== 'undefined') {
-      setIsOffline(!navigator.onLine)
-      const handleOnline = () => setIsOffline(false)
-      const handleOffline = () => setIsOffline(true)
+      setIsOnline(navigator.onLine)
+      const handleOnline = () => setIsOnline(true)
+      const handleOffline = () => setIsOnline(false)
       
       window.addEventListener('online', handleOnline)
       window.addEventListener('offline', handleOffline)
@@ -50,10 +35,14 @@ export default function LitePage() {
     }
   }, [])
 
-  const onSubmit = async (data: TriageForm) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!symptoms.trim()) return
+
     setLoading(true)
     setError(null)
-    
+    setResult(null)
+
     try {
       const response = await fetch('/api/triage', {
         method: 'POST',
@@ -61,18 +50,28 @@ export default function LitePage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...data,
+          symptomsText: symptoms,
+          age: age ? parseInt(age) : undefined,
           month: new Date().getMonth() + 1,
-          consent: false // No consent for lite version
+          consent: true
         }),
       })
 
       if (!response.ok) {
-        throw new Error('Gagal melakukan triage')
+        throw new Error('Triage gagal')
       }
 
-      const triageResult = await response.json()
-      setResult(triageResult)
+      const data = await response.json()
+      if (data.ok && data.result) {
+        setResult({
+          level: data.result.level,
+          score: data.result.score,
+          reasons: data.result.reasons || [],
+          microEducation: data.result.microEducation || []
+        })
+      } else {
+        throw new Error('Format respons tidak valid')
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Terjadi kesalahan')
     } finally {
@@ -82,218 +81,181 @@ export default function LitePage() {
 
   const getRiskColor = (level: string) => {
     switch (level) {
-      case 'EMERGENCY': return 'text-red-600 bg-red-50'
-      case 'CONSULT': return 'text-yellow-600 bg-yellow-50'
-      case 'SELF_CARE': return 'text-green-600 bg-green-50'
-      default: return 'text-gray-600 bg-gray-50'
+      case 'EMERGENCY': return 'text-red-500'
+      case 'CONSULT': return 'text-yellow-500'
+      case 'SELF_CARE': return 'text-green-500'
+      default: return 'text-blue-500'
+    }
+  }
+
+  const getRiskIcon = (level: string) => {
+    switch (level) {
+      case 'EMERGENCY': return <AlertTriangle className="w-5 h-5" />
+      case 'CONSULT': return <Clock className="w-5 h-5" />
+      case 'SELF_CARE': return <CheckCircle className="w-5 h-5" />
+      default: return <HeartPulse className="w-5 h-5" />
     }
   }
 
   const getRiskLabel = (level: string) => {
     switch (level) {
-      case 'EMERGENCY': return 'DARURAT'
-      case 'CONSULT': return 'KONSULTASI'
-      case 'SELF_CARE': return 'PERAWATAN DIRI'
-      default: return level
+      case 'EMERGENCY': return 'Emergency'
+      case 'CONSULT': return 'Consult'
+      case 'SELF_CARE': return 'Self Care'
+      default: return 'Unknown'
     }
   }
 
   return (
-    <div className="min-h-screen bg-white text-rk-text">
-      {/* Minimal Header */}
-      <header className="bg-rk-primary text-white p-4 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-              <HeartPulse className="w-5 h-5" />
-            </div>
-            <h1 className="text-xl font-bold">Raksha Lite</h1>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-            {isOffline ? (
-              <div className="flex items-center gap-1 bg-white/20 px-2 py-1 rounded-lg">
-                <Wifi className="w-4 h-4" />
-                <span>Offline</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-1 bg-white/20 px-2 py-1 rounded-lg">
-                <Smartphone className="w-4 h-4" />
-                <span>Lite</span>
-              </div>
-            )}
-          </div>
+    <div className="min-h-screen bg-rk-bg text-rk-text">
+      {/* Header */}
+      <header className="bg-rk-primary text-white p-4">
+        <div className="max-w-2xl mx-auto flex items-center gap-3">
+          <HeartPulse className="w-6 h-6" />
+          <h1 className="text-lg font-bold">Raksha Lite</h1>
+          {!isOnline && (
+            <span className="text-xs bg-yellow-500 text-black px-2 py-1 rounded">
+              Offline
+            </span>
+          )}
         </div>
       </header>
 
-      <div className="max-w-lg mx-auto p-4">
-        {/* Header */}
-        <div className="text-center mb-6 py-4">
-          <h2 className="text-xl font-bold mb-1">Triage Kesehatan</h2>
-          <p className="text-sm text-gray-600">Mode ringan untuk koneksi lambat</p>
-        </div>
-
-        {/* Form */}
-        <div className="rk-card p-6 mb-6">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* Symptoms */}
+      <main className="max-w-2xl mx-auto p-4">
+        {!result ? (
+          /* Form */
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Gejala *</label>
+              <label className="block text-sm font-medium mb-2">
+                Gejala (wajib)
+              </label>
               <textarea
-                {...register('symptomsText')}
-                className="w-full p-2 border border-gray-300 rounded text-sm resize-none"
-                placeholder="Jelaskan gejala yang dialami..."
-                rows={3}
+                value={symptoms}
+                onChange={(e) => setSymptoms(e.target.value)}
+                placeholder="Jelaskan gejala Anda..."
+                className="w-full p-3 border border-rk-border rounded-lg bg-rk-card text-rk-text placeholder-rk-subtle focus:outline-none focus:ring-2 focus:ring-rk-primary"
+                rows={4}
+                required
               />
-              {errors.symptomsText && (
-                <p className="text-red-600 text-xs mt-1">{errors.symptomsText.message}</p>
-              )}
             </div>
 
-            {/* Age and Temperature */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm font-medium mb-1">Usia</label>
-                <input
-                  type="number"
-                  {...register('age', { valueAsNumber: true })}
-                  className="w-full p-2 border border-gray-300 rounded text-sm"
-                  placeholder="25"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Suhu (°C)</label>
-                <input
-                  type="number"
-                  step="0.1"
-                  {...register('tempC', { valueAsNumber: true })}
-                  className="w-full p-2 border border-gray-300 rounded text-sm"
-                  placeholder="38.5"
-                />
-              </div>
-            </div>
-
-            {/* Region */}
             <div>
-              <label className="block text-sm font-medium mb-1">Wilayah</label>
+              <label className="block text-sm font-medium mb-2">
+                Usia (opsional)
+              </label>
               <input
-                type="text"
-                {...register('region')}
-                className="w-full p-2 border border-gray-300 rounded text-sm"
-                placeholder="Contoh: Jakarta"
+                type="number"
+                value={age}
+                onChange={(e) => setAge(e.target.value)}
+                placeholder="25"
+                className="w-full p-3 border border-rk-border rounded-lg bg-rk-card text-rk-text placeholder-rk-subtle focus:outline-none focus:ring-2 focus:ring-rk-primary"
               />
             </div>
 
-            {/* Red Flags */}
-            <div>
-              <label className="block text-sm font-medium mb-2">Gejala Darurat</label>
-              <div className="space-y-1 text-sm">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    {...register('redFlags.chestPain')}
-                    className="rounded"
-                  />
-                  Nyeri dada
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    {...register('redFlags.bleeding')}
-                    className="rounded"
-                  />
-                  Pendarahan
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    {...register('redFlags.sob')}
-                    className="rounded"
-                  />
-                  Sesak napas
-                </label>
-              </div>
-            </div>
-
-            {/* Submit */}
-            <button
+            <RKButton
               type="submit"
-              disabled={loading}
-              className="w-full rk-button rk-button-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loading || !symptoms.trim()}
+              className="w-full flex items-center justify-center gap-2"
             >
-              {loading ? 'Memproses...' : 'Triage'}
-            </button>
+              {loading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Memproses...
+                </>
+              ) : (
+                <>
+                  Mulai Triage
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </RKButton>
 
             {error && (
-              <div className="p-2 bg-red-100 border border-red-300 rounded text-red-700 text-xs">
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
                 {error}
               </div>
             )}
           </form>
-        </div>
-
-        {/* Results */}
-        {result && (
-          <div className="rk-card p-6 mb-6">
-            <h3 className="font-bold mb-3 text-sm">Hasil Triage</h3>
-            
+        ) : (
+          /* Results */
+          <div className="space-y-6">
             {/* Risk Level */}
-            <div className="mb-4">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-sm font-medium">Tingkat Risiko:</span>
-                <span className={`px-2 py-1 rounded text-xs font-medium ${getRiskColor(result.level)}`}>
-                  {getRiskLabel(result.level)}
-                </span>
+            <div className="text-center p-6 bg-rk-card rounded-lg border border-rk-border">
+              <div className={`inline-flex items-center gap-2 ${getRiskColor(result.level)} mb-2`}>
+                {getRiskIcon(result.level)}
+                <span className="text-lg font-bold">{getRiskLabel(result.level)}</span>
               </div>
-              <p className="text-xs text-gray-600">Skor: {result.score}/100</p>
+              <div className="text-2xl font-bold text-rk-text">
+                Skor: {result.score}/100
+              </div>
             </div>
-
-            {/* Seasonal Context */}
-            {result.seasonalContext && (
-              <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded text-xs">
-                <strong>Konteks Musiman:</strong> {result.seasonalContext}
-              </div>
-            )}
 
             {/* Reasons */}
             {result.reasons.length > 0 && (
-              <div className="mb-4">
-                <h4 className="text-sm font-medium mb-1">Alasan:</h4>
-                <ul className="text-xs text-gray-700 space-y-1">
-                  {result.reasons.map((reason, index) => (
-                    <li key={index}>• {reason}</li>
+              <div>
+                <h3 className="font-semibold mb-3">Alasan:</h3>
+                <ul className="space-y-2">
+                  {result.reasons.slice(0, 3).map((reason, index) => (
+                    <li key={index} className="flex items-start gap-2 text-sm">
+                      <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span>{reason}</span>
+                    </li>
                   ))}
                 </ul>
               </div>
             )}
 
-            {/* Micro Education */}
-            <div className="mb-4">
-              <h4 className="text-sm font-medium mb-1">Panduan:</h4>
-              <ul className="text-xs text-gray-700 space-y-1">
-                {result.microEducation.map((education, index) => (
-                  <li key={index}>• {education}</li>
-                ))}
-              </ul>
-            </div>
+            {/* Tips */}
+            {result.microEducation.length > 0 && (
+              <div>
+                <h3 className="font-semibold mb-3">Tips Perawatan:</h3>
+                <ul className="space-y-2">
+                  {result.microEducation.slice(0, 3).map((tip, index) => (
+                    <li key={index} className="flex items-start gap-2 text-sm">
+                      <div className="w-2 h-2 bg-rk-primary rounded-full mt-2 flex-shrink-0" />
+                      <span>{tip}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
-            {/* Disclaimer */}
-            <div className="p-2 bg-yellow-100 border border-yellow-300 rounded text-yellow-800 text-xs">
-              <strong>PENTING:</strong> Ini bukan diagnosis medis. Konsultasikan dengan dokter.
+            {/* Actions */}
+            <div className="space-y-3">
+              <RKButton
+                onClick={() => {
+                  setResult(null)
+                  setSymptoms('')
+                  setAge('')
+                  setError(null)
+                }}
+                variant="secondary"
+                className="w-full"
+              >
+                Triage Lagi
+              </RKButton>
+              
+              {result.level === 'EMERGENCY' && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-red-600 text-sm font-medium">
+                    ⚠️ Segera cari bantuan medis darurat!
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         )}
 
         {/* Footer */}
-        <footer className="text-center text-xs text-gray-500 py-4">
-          <p>© 2024 Raksha - Mode Lite</p>
-          <p>Bukan perangkat medis</p>
-          <div className="mt-2 flex justify-center gap-4 text-xs">
-            <span>PWA/Offline</span>
-            <span>•</span>
-            <span>Low-Bandwidth</span>
-          </div>
+        <footer className="mt-8 pt-4 border-t border-rk-border text-center">
+          <p className="text-xs text-rk-subtle">
+            Raksha Lite - AI Health Triage untuk Indonesia
+          </p>
+          <p className="text-xs text-rk-subtle mt-1">
+            Bukan pengganti konsultasi medis profesional
+          </p>
         </footer>
-      </div>
+      </main>
     </div>
   )
 }

@@ -13,12 +13,15 @@ import {
   AlertTriangle,
   HeartPulse,
   Clock,
-  User,
   CheckCircle,
+  Info,
   ArrowRight,
-  Shield,
-  Info
+  ExternalLink
 } from 'lucide-react'
+import { RKCard } from '@/src/components/RKCard'
+import { RKButton } from '@/src/components/RKButton'
+import { RKBadge } from '@/src/components/RKBadge'
+import { SectionHeading } from '@/src/components/SectionHeading'
 
 const triageSchema = z.object({
   symptomsText: z.string().min(1, 'Gejala harus diisi'),
@@ -26,28 +29,29 @@ const triageSchema = z.object({
   tempC: z.number().min(30).max(45).optional(),
   daysFever: z.number().min(0).max(30).optional(),
   region: z.string().optional(),
-  month: z.number().min(1).max(12).optional(),
+  diarrheaFreq: z.number().min(0).max(50).optional(),
+  vomitFreq: z.number().min(0).max(50).optional(),
   redFlags: z.object({
     chestPain: z.boolean().optional(),
     bleeding: z.boolean().optional(),
-    sob: z.boolean().optional()
+    sob: z.boolean().optional(),
+    neuro: z.boolean().optional()
   }).optional()
 })
 
 type TriageForm = z.infer<typeof triageSchema>
 
-const symptomSuggestions = [
-  'demam', 'ruam', 'mual', 'pusing', 'lemas', 'batuk', 'sesak', 'nyeri', 'muntah'
-]
-
 const INDONESIAN_PROVINCES = [
-  'Aceh', 'Sumatera Utara', 'Sumatera Barat', 'Riau', 'Kepulauan Riau', 'Jambi',
-  'Sumatera Selatan', 'Bangka Belitung', 'Bengkulu', 'Lampung', 'DKI Jakarta',
-  'Jawa Barat', 'Banten', 'Jawa Tengah', 'DI Yogyakarta', 'Jawa Timur',
-  'Bali', 'Nusa Tenggara Barat', 'Nusa Tenggara Timur', 'Kalimantan Barat',
+  'DKI Jakarta', 'Jawa Barat', 'Jawa Tengah', 'Jawa Timur', 'Banten', 'Bali',
+  'Nusa Tenggara Barat', 'Nusa Tenggara Timur', 'Kalimantan Barat', 
   'Kalimantan Tengah', 'Kalimantan Selatan', 'Kalimantan Timur', 'Kalimantan Utara',
   'Sulawesi Utara', 'Sulawesi Tengah', 'Sulawesi Selatan', 'Sulawesi Tenggara',
   'Gorontalo', 'Sulawesi Barat', 'Maluku', 'Maluku Utara', 'Papua Barat', 'Papua'
+]
+
+const symptomSuggestions = [
+  'demam', 'batuk', 'pilek', 'mual', 'muntah', 'diare', 'pusing', 'lemas', 
+  'ruam', 'sesak napas', 'nyeri dada', 'sakit kepala', 'nyeri perut'
 ]
 
 export default function TriagePage() {
@@ -110,19 +114,19 @@ export default function TriagePage() {
 
   const getRiskColor = (level: string) => {
     switch (level) {
-      case 'EMERGENCY': return 'text-red-600 bg-red-50 border-red-200'
-      case 'CONSULT': return 'text-amber-600 bg-amber-50 border-amber-200'
-      case 'SELF_CARE': return 'text-green-600 bg-green-50 border-green-200'
-      default: return 'text-gray-600 bg-gray-50 border-gray-200'
+      case 'EMERGENCY': return 'border-rk-danger bg-rk-danger-50 text-rk-danger'
+      case 'CONSULT': return 'border-rk-warning bg-rk-warning-50 text-rk-warning'
+      case 'SELF_CARE': return 'border-rk-success bg-rk-success-50 text-rk-success'
+      default: return 'border-rk-primary bg-rk-primary-50 text-rk-primary'
     }
   }
 
   const getRiskLabel = (level: string) => {
     switch (level) {
-      case 'EMERGENCY': return 'DARURAT'
-      case 'CONSULT': return 'KONSULTASI'
-      case 'SELF_CARE': return 'PERAWATAN DIRI'
-      default: return level
+      case 'EMERGENCY': return 'Emergency'
+      case 'CONSULT': return 'Consult'
+      case 'SELF_CARE': return 'Self Care'
+      default: return 'Unknown'
     }
   }
 
@@ -138,9 +142,9 @@ export default function TriagePage() {
   // Show error state if there's an error and not loading
   if (error && !loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="rk-card-elevated p-8 max-w-md text-center">
-          <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+      <div className="min-h-screen bg-rk-bg flex items-center justify-center">
+        <RKCard elevated className="max-w-md text-center">
+          <AlertTriangle className="w-16 h-16 text-rk-danger mx-auto mb-4" />
           <h2 className="text-xl font-bold text-rk-text mb-2">Terjadi Kesalahan</h2>
           <p className="text-rk-subtle mb-4">{error}</p>
           <button
@@ -152,33 +156,34 @@ export default function TriagePage() {
           >
             Coba Lagi
           </button>
-        </div>
+        </RKCard>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-rk-bg">
+      <div className="container mx-auto px-6 md:px-8 py-12">
+        <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 bg-rk-primary-50 text-rk-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
-              <Shield className="w-4 h-4" />
+              <HeartPulse className="w-4 h-4" />
               AI Health Triage
             </div>
-            <h1 className="text-4xl md:text-5xl font-display font-bold text-rk-text mb-6">
+            <SectionHeading as="h1" className="text-4xl md:text-5xl">
               Triage Kesehatan
-            </h1>
-            <p className="text-xl text-rk-subtle max-w-3xl mx-auto leading-relaxed">
+            </SectionHeading>
+            <p className="text-xl text-rk-subtle max-w-3xl mx-auto leading-relaxed mt-6">
               Jelaskan gejala Anda untuk mendapatkan panduan triage yang akurat dan kontekstual untuk Indonesia
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-12">
-            {/* Form Panel */}
-            <div className="space-y-8">
-              <div className="rk-card-elevated p-8">
+          {/* 12-Column Grid Layout */}
+          <div className="grid grid-cols-12 gap-8">
+            {/* Form Panel - 7 columns */}
+            <div className="col-span-12 lg:col-span-7">
+              <RKCard elevated>
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
                   {/* Symptoms */}
                   <div>
@@ -188,12 +193,12 @@ export default function TriagePage() {
                     </label>
                     <textarea
                       {...register('symptomsText')}
-                      className="w-full p-4 border border-rk-border rounded-xl text-rk-text placeholder-rk-subtle focus:outline-none focus:ring-2 focus:ring-rk-primary focus:border-transparent resize-none"
+                      className="w-full p-4 border border-rk-border rounded-xl text-rk-text placeholder-rk-subtle focus:outline-none focus:ring-2 focus:ring-rk-primary focus:border-transparent resize-none bg-rk-card"
                       placeholder="Contoh: demam tinggi 39°C selama 2 hari, mual, ruam merah, lemas"
                       rows={4}
                     />
                     {errors.symptomsText && (
-                      <p className="text-red-600 text-sm mt-2">{errors.symptomsText.message}</p>
+                      <p className="text-rk-danger text-sm mt-2">{errors.symptomsText.message}</p>
                     )}
                     <p className="text-rk-subtle text-sm mt-2">
                       Jelaskan gejala secara detail termasuk durasi dan tingkat keparahan
@@ -223,13 +228,13 @@ export default function TriagePage() {
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-rk-text mb-2">
-                        <User className="w-4 h-4 inline mr-2" />
+                        <Calendar className="w-4 h-4 inline mr-2" />
                         Usia (tahun)
                       </label>
                       <input
                         type="number"
                         {...register('age', { valueAsNumber: true })}
-                        className="w-full p-3 border border-rk-border rounded-lg text-rk-text placeholder-rk-subtle focus:outline-none focus:ring-2 focus:ring-rk-primary focus:border-transparent"
+                        className="w-full p-3 border border-rk-border rounded-lg text-rk-text placeholder-rk-subtle focus:outline-none focus:ring-2 focus:ring-rk-primary focus:border-transparent bg-rk-card"
                         placeholder="25"
                       />
                     </div>
@@ -242,7 +247,7 @@ export default function TriagePage() {
                         type="number"
                         step="0.1"
                         {...register('tempC', { valueAsNumber: true })}
-                        className="w-full p-3 border border-rk-border rounded-lg text-rk-text placeholder-rk-subtle focus:outline-none focus:ring-2 focus:ring-rk-primary focus:border-transparent"
+                        className="w-full p-3 border border-rk-border rounded-lg text-rk-text placeholder-rk-subtle focus:outline-none focus:ring-2 focus:ring-rk-primary focus:border-transparent bg-rk-card"
                         placeholder="38.5"
                       />
                     </div>
@@ -257,7 +262,7 @@ export default function TriagePage() {
                     <input
                       type="number"
                       {...register('daysFever', { valueAsNumber: true })}
-                      className="w-full p-3 border border-rk-border rounded-lg text-rk-text placeholder-rk-subtle focus:outline-none focus:ring-2 focus:ring-rk-primary focus:border-transparent"
+                      className="w-full p-3 border border-rk-border rounded-lg text-rk-text placeholder-rk-subtle focus:outline-none focus:ring-2 focus:ring-rk-primary focus:border-transparent bg-rk-card"
                       placeholder="2"
                     />
                   </div>
@@ -270,7 +275,7 @@ export default function TriagePage() {
                     </label>
                     <select
                       {...register('region')}
-                      className="w-full p-3 border border-rk-border rounded-lg text-rk-text focus:outline-none focus:ring-2 focus:ring-rk-primary focus:border-transparent"
+                      className="w-full p-3 border border-rk-border rounded-lg text-rk-text focus:outline-none focus:ring-2 focus:ring-rk-primary focus:border-transparent bg-rk-card"
                     >
                       <option value="">Pilih provinsi</option>
                       {INDONESIAN_PROVINCES.map((province) => (
@@ -285,57 +290,65 @@ export default function TriagePage() {
                   <div>
                     <label className="block text-sm font-medium text-rk-text mb-3">
                       <AlertTriangle className="w-4 h-4 inline mr-2" />
-                      Gejala Darurat
+                      Gejala Darurat (centang jika ada)
                     </label>
-                    <div className="space-y-3">
-                      <label className="flex items-center gap-3 p-3 border border-rk-border rounded-lg hover:bg-rk-surface transition-colors cursor-pointer">
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <label className="flex items-center gap-3 cursor-pointer">
                         <input
                           type="checkbox"
                           {...register('redFlags.chestPain')}
-                          className="w-4 h-4 text-rk-primary rounded focus:ring-rk-primary"
+                          className="w-4 h-4 text-rk-primary bg-rk-card border-rk-border rounded focus:ring-rk-primary"
                         />
                         <span className="text-rk-text">Nyeri dada</span>
                       </label>
-                      <label className="flex items-center gap-3 p-3 border border-rk-border rounded-lg hover:bg-rk-surface transition-colors cursor-pointer">
+                      <label className="flex items-center gap-3 cursor-pointer">
                         <input
                           type="checkbox"
                           {...register('redFlags.bleeding')}
-                          className="w-4 h-4 text-rk-primary rounded focus:ring-rk-primary"
+                          className="w-4 h-4 text-rk-primary bg-rk-card border-rk-border rounded focus:ring-rk-primary"
                         />
                         <span className="text-rk-text">Pendarahan</span>
                       </label>
-                      <label className="flex items-center gap-3 p-3 border border-rk-border rounded-lg hover:bg-rk-surface transition-colors cursor-pointer">
+                      <label className="flex items-center gap-3 cursor-pointer">
                         <input
                           type="checkbox"
                           {...register('redFlags.sob')}
-                          className="w-4 h-4 text-rk-primary rounded focus:ring-rk-primary"
+                          className="w-4 h-4 text-rk-primary bg-rk-card border-rk-border rounded focus:ring-rk-primary"
                         />
                         <span className="text-rk-text">Sesak napas</span>
+                      </label>
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          {...register('redFlags.neuro')}
+                          className="w-4 h-4 text-rk-primary bg-rk-card border-rk-border rounded focus:ring-rk-primary"
+                        />
+                        <span className="text-rk-text">Gangguan neurologis</span>
                       </label>
                     </div>
                   </div>
 
                   {/* Consent */}
                   <div>
-                    <label className="flex items-start gap-3 p-4 border border-rk-border rounded-lg hover:bg-rk-surface transition-colors cursor-pointer">
+                    <label className="flex items-start gap-3 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={consent}
                         onChange={(e) => setConsent(e.target.checked)}
-                        className="w-4 h-4 text-rk-primary rounded focus:ring-rk-primary mt-1"
+                        className="w-4 h-4 text-rk-primary bg-rk-card border-rk-border rounded focus:ring-rk-primary mt-1"
                       />
-                      <div className="text-sm text-rk-text">
-                        <span className="font-medium">Saya setuju</span> untuk berbagi data anonim untuk penelitian kesehatan masyarakat. 
-                        Data tidak akan menyertakan informasi pribadi.
-                      </div>
+                      <span className="text-rk-text text-sm">
+                        Saya setuju untuk menggunakan layanan triage AI ini dan memahami bahwa ini bukan pengganti konsultasi medis profesional.
+                      </span>
                     </label>
                   </div>
 
                   {/* Submit Button */}
-                  <button
+                  <RKButton
                     type="submit"
-                    disabled={loading}
-                    className="w-full rk-button rk-button-primary rk-button-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    size="lg"
+                    disabled={loading || !consent}
+                    className="w-full flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? (
                       <>
@@ -348,151 +361,150 @@ export default function TriagePage() {
                         <ArrowRight className="w-5 h-5" />
                       </>
                     )}
-                  </button>
+                  </RKButton>
 
                   {error && (
-                    <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                      <div className="flex items-center gap-2 text-red-600">
+                    <div className="p-4 bg-rk-danger-50 border border-rk-danger rounded-lg">
+                      <div className="flex items-center gap-2 text-rk-danger">
                         <AlertTriangle className="w-5 h-5" />
                         <span className="font-medium">Error</span>
                       </div>
-                      <p className="text-red-600 text-sm mt-1">{error}</p>
+                      <p className="text-rk-danger text-sm mt-1">{error}</p>
                     </div>
                   )}
                 </form>
-              </div>
+              </RKCard>
             </div>
 
-            {/* Results Panel */}
-            <div className="space-y-8">
-              {result ? (
-                <div className="rk-card-elevated p-8">
-                  <div className="text-center mb-8">
-                    <div className={`inline-flex items-center gap-3 px-6 py-3 rounded-xl border-2 ${getRiskColor(result.level)} mb-4`}>
-                      {getRiskIcon(result.level)}
-                      <span className="text-lg font-bold">{getRiskLabel(result.level)}</span>
+            {/* Results Panel - 5 columns, sticky */}
+            <div className="col-span-12 lg:col-span-5">
+              <div className="lg:sticky lg:top-8">
+                {result ? (
+                  <RKCard elevated>
+                    <div className="text-center mb-8">
+                      <div className={`inline-flex items-center gap-3 px-6 py-3 rounded-xl border-2 ${getRiskColor(result.level)} mb-4`}>
+                        {getRiskIcon(result.level)}
+                        <span className="text-lg font-bold">{getRiskLabel(result.level)}</span>
+                      </div>
+                      <div className="text-3xl font-bold text-rk-text mb-2">
+                        Skor: {result.score}/100
+                      </div>
+                      <p className="text-rk-subtle">
+                        Berdasarkan analisis gejala dan konteks regional
+                      </p>
                     </div>
-                    <div className="text-3xl font-bold text-rk-text mb-2">
-                      Skor: {result.score}/100
-                    </div>
-                    <p className="text-rk-subtle">
-                      Berdasarkan analisis gejala dan konteks regional
-                    </p>
-                  </div>
 
-                  {/* Seasonal Context */}
-                  {result.seasonalContext && (
-                    <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                      <div className="flex items-start gap-3">
-                        <Info className="w-5 h-5 text-blue-600 mt-0.5" />
-                        <div>
-                          <h4 className="font-semibold text-blue-800 mb-1">Konteks Musiman</h4>
-                          <p className="text-blue-700 text-sm">{result.seasonalContext}</p>
+                    {/* Seasonal Context */}
+                    {result.seasonalContext && (
+                      <div className="mb-6 p-4 bg-rk-primary-50 border border-rk-primary rounded-lg">
+                        <div className="flex items-start gap-3">
+                          <Info className="w-5 h-5 text-rk-primary mt-0.5" />
+                          <div>
+                            <h4 className="font-semibold text-rk-primary mb-1">Konteks Musiman</h4>
+                            <p className="text-rk-primary text-sm">{result.seasonalContext}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* Reasons */}
-                  {result.reasons && result.reasons.length > 0 && (
-                    <div className="mb-6">
-                      <h4 className="text-lg font-semibold text-rk-text mb-3">Alasan Penilaian</h4>
-                      <ul className="space-y-2">
-                        {result.reasons.map((reason: string, index: number) => (
-                          <li key={index} className="flex items-start gap-3">
-                            <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                            <span className="text-rk-text">{reason}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* Micro Education */}
-                  {result.microEducation && result.microEducation.length > 0 && (
-                    <div>
-                      <h4 className="text-lg font-semibold text-rk-text mb-3">Panduan Perawatan</h4>
-                      <ul className="space-y-2">
-                        {result.microEducation.map((education: string, index: number) => (
-                          <li key={index} className="flex items-start gap-3">
-                            <div className="w-2 h-2 bg-rk-primary rounded-full mt-2 flex-shrink-0" />
-                            <span className="text-rk-text">{education}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* Top Conditions */}
-                  {result.topConditions && result.topConditions.length > 0 && (
-                    <div className="mb-6">
-                      <h4 className="text-lg font-semibold text-rk-text mb-3">Kondisi Terdeteksi</h4>
-                      <div className="space-y-2">
-                        {result.topConditions.map((condition: {condition: string, likelihood: number, why: string}, index: number) => (
-                          <div key={index} className="flex items-center justify-between p-3 bg-rk-surface rounded-lg">
-                            <div>
-                              <span className="font-medium text-rk-text">{condition.condition}</span>
-                              <p className="text-sm text-rk-subtle">{condition.why}</p>
-                            </div>
-                            <div className="text-sm text-rk-primary font-medium">
-                              {Math.round(condition.likelihood * 100)}%
-                            </div>
-                          </div>
-                        ))}
+                    {/* Reasons */}
+                    {result.reasons && result.reasons.length > 0 && (
+                      <div className="mb-6">
+                        <h4 className="text-lg font-semibold text-rk-text mb-3">Alasan Penilaian</h4>
+                        <ul className="space-y-2">
+                          {result.reasons.map((reason: string, index: number) => (
+                            <li key={index} className="flex items-start gap-3">
+                              <CheckCircle className="w-5 h-5 text-rk-success mt-0.5 flex-shrink-0" />
+                              <span className="text-rk-text">{reason}</span>
+                            </li>
+                          ))}
+                        </ul>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* Matched Keywords */}
-                  {result.matchedKeywords && result.matchedKeywords.length > 0 && (
-                    <div className="mb-6">
-                      <h4 className="text-lg font-semibold text-rk-text mb-3">Kata Kunci Terdeteksi</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {result.matchedKeywords.map((keyword: string, index: number) => (
-                          <span key={index} className="rk-chip rk-chip-primary">
-                            {keyword}
-                          </span>
-                        ))}
+                    {/* Micro Education */}
+                    {result.microEducation && result.microEducation.length > 0 && (
+                      <div className="mb-6">
+                        <h4 className="text-lg font-semibold text-rk-text mb-3">Panduan Perawatan</h4>
+                        <ul className="space-y-2">
+                          {result.microEducation.map((education: string, index: number) => (
+                            <li key={index} className="flex items-start gap-3">
+                              <div className="w-2 h-2 bg-rk-primary rounded-full mt-2 flex-shrink-0" />
+                              <span className="text-rk-text">{education}</span>
+                            </li>
+                          ))}
+                        </ul>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* Reasoning */}
-                  {result.reasoningLLM && (
-                    <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                      <h4 className="text-lg font-semibold text-rk-text mb-2">Penjelasan Sistem</h4>
-                      <p className="text-rk-subtle text-sm">{result.reasoningLLM}</p>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="rk-card-elevated p-8 text-center">
-                  <div className="w-16 h-16 bg-rk-primary-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <HeartPulse className="w-8 h-8 text-rk-primary" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-rk-text mb-2">
-                    Hasil Triage Akan Muncul Di Sini
-                  </h3>
-                  <p className="text-rk-subtle">
-                    Isi form di sebelah kiri dan klik &quot;Mulai Triage&quot; untuk mendapatkan hasil
-                  </p>
-                </div>
-              )}
+                    {/* Top Conditions */}
+                    {result.topConditions && result.topConditions.length > 0 && (
+                      <div className="mb-6">
+                        <h4 className="text-lg font-semibold text-rk-text mb-3">Kondisi Terdeteksi</h4>
+                        <div className="space-y-2">
+                          {result.topConditions.map((condition: {condition: string, likelihood: number, why: string}, index: number) => (
+                            <div key={index} className="flex items-center justify-between p-3 bg-rk-surface rounded-lg">
+                              <div>
+                                <span className="font-medium text-rk-text">{condition.condition}</span>
+                                <p className="text-sm text-rk-subtle">{condition.why}</p>
+                              </div>
+                              <div className="text-sm text-rk-primary font-medium">
+                                {Math.round(condition.likelihood * 100)}%
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
-              {/* Disclaimer */}
-              <div className="rk-card p-6 bg-amber-50 border-amber-200">
-                <div className="flex items-start gap-3">
-                  <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5" />
-                  <div>
-                    <h4 className="font-semibold text-amber-800 mb-2">Penting</h4>
-                    <p className="text-amber-700 text-sm mb-2">
-                      Raksha bukan perangkat medis. Hasil triage hanya sebagai panduan awal.
+                    {/* Matched Keywords */}
+                    {result.matchedKeywords && result.matchedKeywords.length > 0 && (
+                      <div className="mb-6">
+                        <h4 className="text-lg font-semibold text-rk-text mb-3">Kata Kunci Terdeteksi</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {result.matchedKeywords.map((keyword: string, index: number) => (
+                            <RKBadge key={index} variant="primary">
+                              {keyword}
+                            </RKBadge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Find Nearest Hospital */}
+                    <div className="mt-8 p-4 bg-rk-surface rounded-lg">
+                      <h4 className="font-semibold text-rk-text mb-2">Butuh Bantuan Medis?</h4>
+                      <p className="text-rk-subtle text-sm mb-3">
+                        Cari rumah sakit terdekat untuk penanganan lebih lanjut
+                      </p>
+                      <RKButton 
+                        variant="secondary" 
+                        size="sm"
+                        className="w-full flex items-center justify-center gap-2"
+                        onClick={() => {
+                          const region = result.seasonalContext || 'Indonesia'
+                          const query = encodeURIComponent(`rumah sakit terdekat ${region}`)
+                          window.open(`https://www.google.com/maps/search/${query}`, '_blank')
+                        }}
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        Cari Rumah Sakit Terdekat
+                      </RKButton>
+                    </div>
+                  </RKCard>
+                ) : (
+                  <RKCard elevated className="text-center">
+                    <div className="w-16 h-16 bg-rk-primary-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <HeartPulse className="w-8 h-8 text-rk-primary" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-rk-text mb-2">
+                      Hasil Triage Akan Muncul di Sini
+                    </h3>
+                    <p className="text-rk-subtle">
+                      Isi form di sebelah kiri dan klik &quot;Mulai Triage&quot; untuk mendapatkan analisis kesehatan AI
                     </p>
-                    <p className="text-amber-700 text-sm">
-                      Dalam keadaan darurat, segera hubungi 118/119 atau ke IGD terdekat.
-                    </p>
-                  </div>
-                </div>
+                  </RKCard>
+                )}
               </div>
             </div>
           </div>
